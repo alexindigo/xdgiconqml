@@ -174,6 +174,27 @@ private slots:
         for (const QString &p : paths)
             QVERIFY(p.contains("icons") || p.contains("pixmaps"));
     }
+
+    void testDbusBroadcastEnabled()
+    {
+        XdgIconTheme *prev = XdgIconTheme::instance();
+        delete prev;
+
+        XdgIconTheme theme;
+        QVERIFY(!theme.dbusBroadcastEnabled());
+
+        QSignalSpy spy(&theme, &XdgIconTheme::dbusBroadcastEnabledChanged);
+        theme.setDbusBroadcastEnabled(true);
+        QVERIFY(theme.dbusBroadcastEnabled());
+        QCOMPARE(spy.count(), 1);
+
+        theme.setDbusBroadcastEnabled(true);
+        QCOMPARE(spy.count(), 1);
+
+        theme.setDbusBroadcastEnabled(false);
+        QVERIFY(!theme.dbusBroadcastEnabled());
+        QCOMPARE(spy.count(), 2);
+    }
 };
 
 QTEST_MAIN(TestXdgIconTheme)

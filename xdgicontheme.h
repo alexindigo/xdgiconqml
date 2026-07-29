@@ -17,6 +17,8 @@ class XdgIconTheme : public QObject
                NOTIFY currentThemeChanged)
     Q_PROPERTY(QStringList availableThemes READ availableThemes NOTIFY availableThemesChanged)
     Q_PROPERTY(QStringList searchPaths READ searchPaths NOTIFY searchPathsChanged)
+    Q_PROPERTY(bool dbusBroadcastEnabled READ dbusBroadcastEnabled WRITE setDbusBroadcastEnabled
+               NOTIFY dbusBroadcastEnabledChanged)
     QML_ELEMENT
     QML_SINGLETON
 
@@ -32,6 +34,9 @@ public:
     QStringList availableThemes() const;
     QStringList searchPaths() const;
 
+    bool dbusBroadcastEnabled() const;
+    void setDbusBroadcastEnabled(bool enabled);
+
     QStringList themeChain() const;
 
     Q_INVOKABLE void rescan();
@@ -40,6 +45,7 @@ signals:
     void currentThemeChanged();
     void availableThemesChanged();
     void searchPathsChanged();
+    void dbusBroadcastEnabledChanged();
     void themeReloaded();
 
 private:
@@ -59,6 +65,7 @@ private:
     QStringList m_searchPaths;
     QStringList m_themeChain;
     bool m_initialized = false;
+    bool m_dbusBroadcastEnabled = false;
 
     XdgPathWatcher *m_pathWatcher = nullptr;
     XdgThemeWatcher *m_themeWatcher = nullptr;

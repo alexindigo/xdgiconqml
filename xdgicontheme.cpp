@@ -223,7 +223,23 @@ void XdgIconTheme::setupBroadcast()
     m_broadcast = new XdgBroadcast(this);
     connect(m_broadcast, &XdgBroadcast::themeChanged,
             this, &XdgIconTheme::setCurrentTheme);
+}
+
+bool XdgIconTheme::dbusBroadcastEnabled() const
+{
+    return m_dbusBroadcastEnabled;
+}
+
+void XdgIconTheme::setDbusBroadcastEnabled(bool enabled)
+{
+    if (m_dbusBroadcastEnabled == enabled)
+        return;
+    m_dbusBroadcastEnabled = enabled;
+    emit dbusBroadcastEnabledChanged();
+
+    if (enabled && m_broadcast) {
 #ifdef WITH_DBUS_BROADCAST
-    m_broadcast->startListening();
+        m_broadcast->startListening();
 #endif
+    }
 }
