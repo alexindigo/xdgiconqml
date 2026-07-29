@@ -3,13 +3,11 @@
 
 #include <QObject>
 #include <QUrl>
-#include <QSize>
-
-#include "xdgtypes.h"
+#include <QStringList>
+#include <QtQml/qqmlregistration.h>
 
 class XdgIconTheme;
 class XdgCache;
-class XdgLookup;
 
 class XdgIcon : public QObject
 {
@@ -17,9 +15,13 @@ class XdgIcon : public QObject
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(int size READ size WRITE setSize NOTIFY sizeChanged)
     Q_PROPERTY(int scale READ scale WRITE setScale NOTIFY scaleChanged)
-    Q_PROPERTY(QString themeOverride READ themeOverride WRITE setThemeOverride NOTIFY themeOverrideChanged)
+    Q_PROPERTY(QString themeOverride READ themeOverride WRITE setThemeOverride
+               NOTIFY themeOverrideChanged)
     Q_PROPERTY(QUrl path READ path NOTIFY pathChanged)
     Q_PROPERTY(bool found READ found NOTIFY foundChanged)
+    Q_PROPERTY(QString extension READ extension NOTIFY extensionChanged)
+    Q_PROPERTY(bool isSymbolic READ isSymbolic NOTIFY isSymbolicChanged)
+    QML_ELEMENT
 
 public:
     explicit XdgIcon(QObject *parent = nullptr);
@@ -39,6 +41,9 @@ public:
     QUrl path() const;
     bool found() const;
 
+    QString extension() const;
+    bool isSymbolic() const;
+
     Q_INVOKABLE void reload();
 
 signals:
@@ -48,9 +53,13 @@ signals:
     void themeOverrideChanged();
     void pathChanged();
     void foundChanged();
+    void extensionChanged();
+    void isSymbolicChanged();
 
 private:
-    void triggerReload();
+    void resolve();
+    static QStringList effectiveSearchPaths();
+    static QStringList effectiveThemeChain(const QString &themeOverride);
 
     QString m_name;
     int m_size = 48;
@@ -58,6 +67,8 @@ private:
     QString m_themeOverride;
     QUrl m_path;
     bool m_found = false;
+    QString m_extension;
+    bool m_isSymbolic = false;
 };
 
 #endif // XDGICON_H
