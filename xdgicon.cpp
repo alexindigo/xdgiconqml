@@ -1,7 +1,10 @@
 #include "xdgicon.h"
 #include "xdgcache.h"
+#include "xdgicontheme.h"
+#include "xdgindexparse.h"
 #include "xdglookup.h"
 
+#include <QDir>
 #include <QFileInfo>
 
 XdgIcon::XdgIcon(QObject *parent)
@@ -159,16 +162,42 @@ void XdgIcon::resolve()
 
 QStringList XdgIcon::effectiveSearchPaths()
 {
+    XdgIconTheme *theme = XdgIconTheme::instance();
+    if (theme) {
+        QStringList paths = theme->searchPaths();
+        if (!paths.isEmpty())
+            return paths;
+    }
     return XdgLookup::xdgIconPaths();
 }
 
 QStringList XdgIcon::effectiveThemeChain(const QString &themeOverride)
 {
-    QStringList chain;
+    XdgIconTheme *theme = XdgIconTheme::instance();
+
     if (!themeOverride.isEmpty()) {
+        QStringList chain;
         chain.append(themeOverride);
-    } else {
-        chain.append(QStringLiteral("hicolor"));
+        if (theme) {
+            for (const QString &base : theme->searchPaths()) {
+                auto meta = XdgIndexParse::parseIndexFile(
+                    base + QLatin1Char('/') + themeOverride);
+                if (!meta.themeName.isEmpty()) {
+                    for (const QString &parent : meta.inherits)
+                        chain.append(parent);
+                    break;
+                }
+            }
+        }
+        if (!chain.contains(QStringLiteral("hicolor")))
+            chain.append(QStringLiteral("hicolor"));
+        return chain;
     }
-    return chain;
+
+    if (theme) {
+        QStringList chain = theme->themeChain();
+        if (!chain.isEmpty())
+            return chain;
+    }
+    return {QStringLiteral("hicolor")};
 }
