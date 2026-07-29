@@ -15,21 +15,34 @@ public:
         bool found = false;
     };
 
+    static QStringList xdgIconPaths();
+
     static Result lookupIcon(const QString &iconName,
                              int size,
                              int scale,
-                             const QString &theme,
-                             const QStringList &themeHierarchy);
+                             const QStringList &searchPaths,
+                             const QStringList &themeChain);
 
-    static QStringList resolveThemeHierarchy(const QString &theme);
-    static QStringList getIconPaths();
+    static bool dirMatchesIcon(const XdgIconDir &dir,
+                                int targetSize,
+                                int targetScale);
+
+    static int sizeDistance(const XdgIconDir &dir,
+                            int targetSize,
+                            int targetScale);
 
 private:
-    static QStringList xdgDataDirectories();
-    static QString findBestInDir(const QString &dir,
-                                 const QString &iconName,
-                                 int size,
-                                 int scale);
+    static QStringList iconExtensions();
+    static Result findInTheme(const QString &themeRoot,
+                              const QString &iconName,
+                              int size,
+                              int scale);
+    static Result findAnySizeInTheme(const QString &themeRoot,
+                                     const QString &iconName,
+                                     int size,
+                                     int scale);
+    static QString findLooseIcon(const QString &iconName,
+                                 const QStringList &searchPaths);
 };
 
 #endif // XDGLOOKUP_H

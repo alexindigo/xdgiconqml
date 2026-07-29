@@ -144,6 +144,7 @@ if(BUILD_TEST_MODE)
     endmacro()
 
     add_xdgiconqml_test(test_xdgindexparse)
+    add_xdgiconqml_test(test_xdglookup)
 endif()
 
 # ==================== COVERAGE ====================
