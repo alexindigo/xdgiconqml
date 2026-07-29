@@ -1,6 +1,9 @@
 #include "xdgicontheme.h"
+#include "xdgbroadcast.h"
 #include "xdgindexparse.h"
 #include "xdglookup.h"
+#include "xdgpathwatcher.h"
+#include "xdgthemewatcher.h"
 
 #include <QDir>
 #include <QFile>
@@ -20,6 +23,8 @@ XdgIconTheme::XdgIconTheme(QObject *parent)
     detectCurrentTheme();
     scanAvailableThemes();
     resolveThemeChain();
+    setupWatchers();
+    setupBroadcast();
     m_initialized = true;
 }
 
@@ -194,4 +199,31 @@ QString XdgIconTheme::readQt6CtTheme()
     QString theme = settings.value(QStringLiteral("icon_theme")).toString();
     settings.endGroup();
     return theme;
+}
+
+void XdgIconTheme::setupWatchers()
+{
+    m_pathWatcher = new XdgPathWatcher(this);
+    m_pathWatcher->watchPaths(m_searchPaths);
+    connect(m_pathWatcher, &XdgPathWatcher::rescanTriggered,
+            this, &XdgIconTheme::rescan);
+
+    m_themeWatcher = new XdgThemeWatcher(this);
+    QString home = QDir::homePath();
+    m_themeWatcher->watchThemeConfig(home + QStringLiteral("/.config/gtk-3.0/settings.ini"));
+    m_themeWatcher->watchThemeConfig(home + QStringLiteral("/.config/gtk-4.0/settings.ini"));
+    m_themeWatcher->watchThemeConfig(home + QStringLiteral("/.config/qt6ct/qt6ct.conf"));
+    m_themeWatcher->watchThemeConfig(home + QStringLiteral("/.config/kdeglobals"));
+    connect(m_themeWatcher, &XdgThemeWatcher::themeConfigChanged,
+            this, &XdgIconTheme::rescan);
+}
+
+void XdgIconTheme::setupBroadcast()
+{
+    m_broadcast = new XdgBroadcast(this);
+    connect(m_broadcast, &XdgBroadcast::themeChanged,
+            this, &XdgIconTheme::setCurrentTheme);
+#ifdef WITH_DBUS_BROADCAST
+    m_broadcast->startListening();
+#endif
 }

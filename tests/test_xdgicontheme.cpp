@@ -135,11 +135,16 @@ private slots:
 
         XdgIconTheme *a = XdgIconTheme::instance();
         XdgIconTheme *b = XdgIconTheme::instance();
-        QCOMPARE(a, b);
+        QCOMPARE(a, b);       // same instance returned
 
+        bool deleted = false;
+        connect(a, &QObject::destroyed, [&]() { deleted = true; });
         delete a;
+        QVERIFY(deleted);
+
         XdgIconTheme *c = XdgIconTheme::instance();
-        QVERIFY(c != a);
+        QVERIFY(c != nullptr);
+        QVERIFY(deleted);     // previous instance was destroyed
         delete c;
     }
 

@@ -6,7 +6,7 @@
 
 #ifdef WITH_DBUS_BROADCAST
 #include <QDBusConnection>
-#include <QDBusServiceWatcher>
+#include <QDBusMessage>
 #endif
 
 class XdgBroadcast : public QObject
@@ -16,15 +16,19 @@ class XdgBroadcast : public QObject
 public:
     explicit XdgBroadcast(QObject *parent = nullptr);
 
-    void startWatching();
+    void startListening();
+    void broadcastIconChanged(const QString &name);
 
 signals:
     void themeChanged(const QString &theme);
 
 private:
 #ifdef WITH_DBUS_BROADCAST
-    void setupDBusWatches();
-    QDBusServiceWatcher *m_serviceWatcher = nullptr;
+    void connectPortalSettings();
+    Q_INVOKABLE void onSettingChanged(const QString &ns,
+                                       const QString &key,
+                                       const QDBusVariant &value);
+    QDBusConnection m_connection;
 #endif
 };
 

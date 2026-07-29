@@ -5,7 +5,9 @@
 #include <QStringList>
 #include <QtQml/qqmlregistration.h>
 
+class XdgBroadcast;
 class XdgCache;
+class XdgPathWatcher;
 class XdgThemeWatcher;
 
 class XdgIconTheme : public QObject
@@ -45,6 +47,8 @@ private:
     void scanAvailableThemes();
     void buildSearchPaths();
     void resolveThemeChain();
+    void setupWatchers();
+    void setupBroadcast();
 
     QString readGtkConfigTheme(const QString &configPath);
     QString readQt6CtTheme();
@@ -55,6 +59,10 @@ private:
     QStringList m_searchPaths;
     QStringList m_themeChain;
     bool m_initialized = false;
+
+    XdgPathWatcher *m_pathWatcher = nullptr;
+    XdgThemeWatcher *m_themeWatcher = nullptr;
+    XdgBroadcast *m_broadcast = nullptr;
 
     static XdgIconTheme *s_instance;
 };
