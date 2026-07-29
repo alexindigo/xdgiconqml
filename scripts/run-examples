@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+BUILD_DIR="${PROJECT_DIR}/build-dev"
+
+if [ ! -d "$BUILD_DIR" ]; then
+    echo "Build directory not found. Run scripts/build-dev first."
+    exit 1
+fi
+
+export QML_IMPORT_PATH="${BUILD_DIR}/XdgIcon${QML_IMPORT_PATH:+:${QML_IMPORT_PATH}}"
+export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}"
+
+echo "QML_IMPORT_PATH=${QML_IMPORT_PATH}"
+echo "QT_QPA_PLATFORM=${QT_QPA_PLATFORM}"
+echo ""
+
+for example in "${PROJECT_DIR}/examples/"*.qml; do
+    [ -f "$example" ] || continue
+    echo "=== Running: $(basename "$example") ==="
+    qml "$example" "$@"
+    echo ""
+done
