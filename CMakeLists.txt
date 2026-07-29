@@ -12,7 +12,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Qt6 6.4 REQUIRED COMPONENTS Core Qml Quick)
-qt_policy(SET QTP0001 NEW)
+if(Qt6_VERSION VERSION_GREATER_EQUAL 6.5)
+    qt_policy(SET QTP0001 NEW)
+endif()
 
 include(GNUInstallDirs)
 
