@@ -145,6 +145,7 @@ if(BUILD_TEST_MODE)
 
     add_xdgiconqml_test(test_xdgindexparse)
     add_xdgiconqml_test(test_xdglookup)
+    add_xdgiconqml_test(test_xdgcache)
 endif()
 
 # ==================== COVERAGE ====================
