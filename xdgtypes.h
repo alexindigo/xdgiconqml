@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QString>
-#include <QSize>
 
 enum class XdgIconType {
     Unknown,
@@ -29,9 +28,10 @@ enum class XdgIconContext {
 
 struct XdgIconDir {
     QString subdir;
-    QSize size;
-    QSize maxSize;
-    QSize minSize;
+    int size = 0;
+    int maxSize = 0;
+    int minSize = 0;
+    int threshold = 2;
     XdgIconType type = XdgIconType::Threshold;
     XdgIconContext context = XdgIconContext::Unknown;
     int scale = 1;

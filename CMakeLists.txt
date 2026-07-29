@@ -126,7 +126,24 @@ option(BUILD_TEST_MODE "Build C++ test executables" ON)
 if(BUILD_TEST_MODE)
     find_package(Qt6 6.8 REQUIRED COMPONENTS Test)
 
-    enable_testing()
+    macro(add_xdgiconqml_test NAME)
+        add_executable(${NAME} tests/${NAME}.cpp)
+        target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+        target_link_libraries(${NAME} PRIVATE
+            Qt6::Core Qt6::Qml Qt6::Quick Qt6::Test xdgiconqml
+        )
+        enable_testing()
+        add_test(NAME ${NAME} COMMAND ${NAME})
+        set_tests_properties(${NAME} PROPERTIES
+            ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+        )
+        if(ENABLE_COVERAGE)
+            target_compile_options(${NAME} PRIVATE --coverage -fprofile-abs-path)
+            target_link_options(${NAME} PRIVATE --coverage -fprofile-abs-path)
+        endif()
+    endmacro()
+
+    add_xdgiconqml_test(test_xdgindexparse)
 endif()
 
 # ==================== COVERAGE ====================

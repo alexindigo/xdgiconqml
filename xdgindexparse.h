@@ -1,8 +1,8 @@
 #ifndef XDGINDEXPARSE_H
 #define XDGINDEXPARSE_H
 
-#include <QMap>
 #include <QString>
+#include <QStringList>
 #include <QVector>
 
 #include "xdgtypes.h"
@@ -10,12 +10,23 @@
 class XdgIndexParse
 {
 public:
-    static QVector<XdgIconDir> parseIndexFile(const QString &path);
-    static QString lookupInherits(const QString &path);
+    struct ThemeMeta {
+        QString themeName;
+        QStringList directories;
+        QStringList scaledDirectories;
+        QStringList inherits;
+        bool hidden = false;
+        QVector<XdgIconDir> iconDirs;
+    };
+
+    static ThemeMeta parseIndexFile(const QString &themeRoot);
+    static QVector<XdgIconDir> fallbackIconDirs(const QString &themeRoot);
+    static int sizeFromDirName(const QString &dirName);
 
 private:
-    static QVector<XdgIconDir> parseIconDirectories(const QString &content);
-    static QMap<QString, QString> parseKeyValue(const QString &content, const QString &section);
+    static XdgIconType parseType(const QString &typeStr);
+    static XdgIconContext parseContext(const QString &contextStr);
+    static bool isDirectorySection(const QString &section, const QStringList &knownDirs);
 };
 
 #endif // XDGINDEXPARSE_H
