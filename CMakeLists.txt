@@ -152,6 +152,12 @@ if(BUILD_TEST_MODE)
     add_xdgiconqml_test(test_xdgicontheme)
 endif()
 
+# ==================== TOOLS ====================
+
+add_executable(xdgiconqml-lookup tools/xdgiconqml-lookup.cpp)
+target_include_directories(xdgiconqml-lookup PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(xdgiconqml-lookup PRIVATE Qt6::Core xdgiconqml)
+
 # ==================== COVERAGE ====================
 
 option(ENABLE_COVERAGE "Instrument targets for code coverage collection" OFF)
