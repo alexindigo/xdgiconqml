@@ -1,5 +1,6 @@
 #include "xdgicontheme.h"
 #include "xdgbroadcast.h"
+#include "xdgicon.h"
 #include "xdgindexparse.h"
 #include "xdglookup.h"
 #include "xdgpathwatcher.h"
@@ -224,6 +225,10 @@ void XdgIconTheme::setupBroadcast()
     m_broadcast = new XdgBroadcast(this);
     connect(m_broadcast, &XdgBroadcast::themeChanged,
             this, &XdgIconTheme::setCurrentTheme);
+    connect(m_broadcast, &XdgBroadcast::iconChanged,
+            this, [](const QString &name) {
+                XdgIcon::invalidateCacheForName(name);
+            });
 }
 
 bool XdgIconTheme::dbusBroadcastEnabled() const

@@ -45,6 +45,7 @@ public:
     bool isSymbolic() const;
 
     Q_INVOKABLE void reload(bool force = false);
+    static void invalidateCacheForName(const QString &name);
 
 signals:
     void nameChanged();

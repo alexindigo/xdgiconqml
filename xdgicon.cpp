@@ -7,6 +7,8 @@
 #include <QDir>
 #include <QFileInfo>
 
+static XdgCache s_cache;
+
 XdgIcon::XdgIcon(QObject *parent)
     : QObject(parent)
 {
@@ -95,10 +97,9 @@ void XdgIcon::resolve(bool force)
     QString key = XdgCache::makeKey(m_name, m_size, m_scale,
                                      themes.join(QLatin1Char(',')));
 
-    static XdgCache cache;
     if (!force) {
-        XdgCacheEntry cached = cache.lookup(key);
-        if (cached.path.isEmpty() && cache.contains(key)) {
+        XdgCacheEntry cached = s_cache.lookup(key);
+        if (cached.path.isEmpty() && s_cache.contains(key)) {
             if (m_found) {
                 m_found = false;
                 m_path.clear();
@@ -133,7 +134,7 @@ void XdgIcon::resolve(bool force)
         entry.path = result.path;
         entry.size = m_size;
         entry.scale = m_scale;
-        cache.insert(key, entry);
+        s_cache.insert(key, entry);
 
         QUrl newUrl = QUrl::fromLocalFile(result.path);
         if (m_path != newUrl || !m_found) {
@@ -149,7 +150,7 @@ void XdgIcon::resolve(bool force)
     } else {
         XdgCacheEntry missEntry;
         missEntry.path = QString();
-        cache.insert(key, missEntry);
+        s_cache.insert(key, missEntry);
 
         if (m_found) {
             m_found = false;
@@ -202,4 +203,9 @@ QStringList XdgIcon::effectiveThemeChain(const QString &themeOverride)
             return chain;
     }
     return {QStringLiteral("hicolor")};
+}
+
+void XdgIcon::invalidateCacheForName(const QString &name)
+{
+    s_cache.invalidateName(name);
 }

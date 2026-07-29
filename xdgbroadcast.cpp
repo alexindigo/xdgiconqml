@@ -9,12 +9,16 @@ void XdgBroadcast::startListening()
 {
 #ifdef WITH_DBUS_BROADCAST
     connectPortalSettings();
+    subscribePeerBroadcast();
 #endif
 }
 
 void XdgBroadcast::broadcastIconChanged(const QString &name)
 {
 #ifdef WITH_DBUS_BROADCAST
+    if (isDampened(name))
+        return;
+
     QDBusMessage signal = QDBusMessage::createSignal(
         QStringLiteral("/org/atmosphera/IconResolver"),
         QStringLiteral("org.atmosphera.IconResolver"),
@@ -22,6 +26,7 @@ void XdgBroadcast::broadcastIconChanged(const QString &name)
     signal << name;
 
     QDBusConnection::sessionBus().send(signal);
+    markBroadcasted(name);
 #else
     Q_UNUSED(name)
 #endif
@@ -47,6 +52,21 @@ void XdgBroadcast::connectPortalSettings()
     }
 }
 
+void XdgBroadcast::subscribePeerBroadcast()
+{
+    bool ok = m_connection.connect(
+        QString(),
+        QStringLiteral("/org/atmosphera/IconResolver"),
+        QStringLiteral("org.atmosphera.IconResolver"),
+        QStringLiteral("IconChanged"),
+        this,
+        SLOT(onIconChanged(QString)));
+
+    if (!ok) {
+        qInfo("XdgBroadcast: Peer IconChanged subscription failed");
+    }
+}
+
 void XdgBroadcast::onSettingChanged(const QString &ns,
                                      const QString &key,
                                      const QDBusVariant &value)
@@ -57,5 +77,27 @@ void XdgBroadcast::onSettingChanged(const QString &ns,
         if (!theme.isEmpty())
             emit themeChanged(theme);
     }
+}
+
+void XdgBroadcast::onIconChanged(const QString &name)
+{
+    if (name.isEmpty())
+        return;
+    emit iconChanged(name);
+}
+
+bool XdgBroadcast::isDampened(const QString &name)
+{
+    auto it = m_recentBroadcasts.find(name);
+    if (it == m_recentBroadcasts.end())
+        return false;
+
+    qint64 elapsed = it->msecsTo(QDateTime::currentDateTimeUtc());
+    return elapsed < kDampenMs;
+}
+
+void XdgBroadcast::markBroadcasted(const QString &name)
+{
+    m_recentBroadcasts[name] = QDateTime::currentDateTimeUtc();
 }
 #endif
