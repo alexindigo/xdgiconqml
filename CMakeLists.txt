@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Core Qml Quick)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Core Qml Quick)
 qt_policy(SET QTP0001 NEW)
 
 include(GNUInstallDirs)
@@ -57,7 +57,7 @@ target_link_libraries(xdgiconqml PRIVATE
 )
 
 if(WITH_DBUS_BROADCAST)
-    find_package(Qt6 6.8 REQUIRED COMPONENTS DBus)
+        find_package(Qt6 6.4 REQUIRED COMPONENTS DBus)
     target_link_libraries(xdgiconqml PRIVATE Qt6::DBus)
     target_compile_definitions(xdgiconqml PRIVATE WITH_DBUS_BROADCAST)
 endif()
@@ -124,7 +124,7 @@ install(FILES
 option(BUILD_TEST_MODE "Build C++ test executables" ON)
 
 if(BUILD_TEST_MODE)
-    find_package(Qt6 6.8 REQUIRED COMPONENTS Test)
+    find_package(Qt6 6.4 REQUIRED COMPONENTS Test)
 
     macro(add_xdgiconqml_test NAME)
         add_executable(${NAME} tests/${NAME}.cpp)
