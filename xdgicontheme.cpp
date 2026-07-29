@@ -74,6 +74,7 @@ void XdgIconTheme::rescan()
     emit searchPathsChanged();
     emit availableThemesChanged();
     emit themeReloaded();
+    emit propertiesChanged();
 }
 
 // -- private --

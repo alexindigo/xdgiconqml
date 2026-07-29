@@ -61,12 +61,12 @@ bool XdgIcon::found() const { return m_found; }
 QString XdgIcon::extension() const { return m_extension; }
 bool XdgIcon::isSymbolic() const { return m_isSymbolic; }
 
-void XdgIcon::reload()
+void XdgIcon::reload(bool force)
 {
-    resolve();
+    resolve(force);
 }
 
-void XdgIcon::resolve()
+void XdgIcon::resolve(bool force)
 {
     bool wasSymbolic = m_isSymbolic;
     m_isSymbolic = m_name.endsWith(QStringLiteral("-symbolic"));
@@ -96,32 +96,34 @@ void XdgIcon::resolve()
                                      themes.join(QLatin1Char(',')));
 
     static XdgCache cache;
-    XdgCacheEntry cached = cache.lookup(key);
-    if (cached.path.isEmpty() && cache.contains(key)) {
-        if (m_found) {
-            m_found = false;
-            m_path.clear();
-            m_extension.clear();
-            emit foundChanged();
-            emit pathChanged();
-            emit extensionChanged();
+    if (!force) {
+        XdgCacheEntry cached = cache.lookup(key);
+        if (cached.path.isEmpty() && cache.contains(key)) {
+            if (m_found) {
+                m_found = false;
+                m_path.clear();
+                m_extension.clear();
+                emit foundChanged();
+                emit pathChanged();
+                emit extensionChanged();
+            }
+            return;
         }
-        return;
-    }
 
-    if (!cached.path.isEmpty()) {
-        QString newPath = cached.path;
-        if (m_path.toLocalFile() != newPath) {
-            m_found = true;
-            m_path = QUrl::fromLocalFile(newPath);
-            QFileInfo fi(newPath);
-            m_extension = fi.suffix();
+        if (!cached.path.isEmpty()) {
+            QString newPath = cached.path;
+            if (m_path.toLocalFile() != newPath) {
+                m_found = true;
+                m_path = QUrl::fromLocalFile(newPath);
+                QFileInfo fi(newPath);
+                m_extension = fi.suffix();
 
-            emit foundChanged();
-            emit pathChanged();
-            emit extensionChanged();
+                emit foundChanged();
+                emit pathChanged();
+                emit extensionChanged();
+            }
+            return;
         }
-        return;
     }
 
     auto result = XdgLookup::lookupIcon(m_name, m_size, m_scale, paths, themes);

@@ -44,7 +44,7 @@ public:
     QString extension() const;
     bool isSymbolic() const;
 
-    Q_INVOKABLE void reload();
+    Q_INVOKABLE void reload(bool force = false);
 
 signals:
     void nameChanged();
@@ -57,7 +57,7 @@ signals:
     void isSymbolicChanged();
 
 private:
-    void resolve();
+    void resolve(bool force = false);
     static QStringList effectiveSearchPaths();
     static QStringList effectiveThemeChain(const QString &themeOverride);
 

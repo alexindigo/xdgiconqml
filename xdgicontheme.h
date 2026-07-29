@@ -47,6 +47,7 @@ signals:
     void searchPathsChanged();
     void dbusBroadcastEnabledChanged();
     void themeReloaded();
+    void propertiesChanged();
 
 private:
     void detectCurrentTheme();
