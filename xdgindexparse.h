@@ -1,6 +1,7 @@
 #ifndef XDGINDEXPARSE_H
 #define XDGINDEXPARSE_H
 
+#include <QMap>
 #include <QString>
 #include <QVector>
 

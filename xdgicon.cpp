@@ -52,7 +52,7 @@ void XdgIcon::reload()
 void XdgIcon::triggerReload()
 {
     // TODO: Implement XDG icon lookup
-    m_path = {};
+    m_path.clear();
     m_found = false;
     emit pathChanged();
     emit foundChanged();
