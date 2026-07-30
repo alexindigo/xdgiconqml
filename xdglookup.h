@@ -28,7 +28,8 @@ private:
     static Result findInTheme(const QString &themeRoot, const QString &iconName, int size,
                               int scale);
     static Result findAnySizeInTheme(const QString &themeRoot, const QString &iconName, int size,
-                                     int scale);
+                                     int scale, int *bestDist = nullptr,
+                                     Result *bestResult = nullptr);
     static QString findLooseIcon(const QString &iconName, const QStringList &searchPaths);
 };
 

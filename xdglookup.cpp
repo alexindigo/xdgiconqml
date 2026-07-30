@@ -56,7 +56,9 @@ XdgLookup::Result XdgLookup::lookupIcon(const QString &iconName, int size, int s
         }
     }
 
-    // Pass 2: closest size match, first theme to yield anything wins
+    // Pass 2: closest size match within each theme, first theme to yield
+    // anything wins (spec: "As soon as there is an icon of any size that
+    // matches in a theme, the search is stopped.").
     for (const QString &theme : themeChain) {
         Result bestInTheme;
         int bestDist = std::numeric_limits<int>::max();
@@ -66,23 +68,9 @@ XdgLookup::Result XdgLookup::lookupIcon(const QString &iconName, int size, int s
             if (!QFileInfo::exists(themeRoot))
                 continue;
 
-            Result r = findAnySizeInTheme(themeRoot, iconName, size, scale);
-            if (!r.found)
-                continue;
-
-            // estimate distance from the file path
-            QFileInfo fi(r.path);
-            int dist = XdgIndexParse::sizeFromDirName(fi.absolutePath());
-            if (dist == 0) {
-                dist = 10000; // scalable dir, distance guess — prefer closer bitmap
-            } else {
-                dist = std::abs(dist - size);
-            }
-
-            if (dist < bestDist) {
-                bestDist = dist;
-                bestInTheme = r;
-            }
+            Result r =
+                findAnySizeInTheme(themeRoot, iconName, size, scale, &bestDist, &bestInTheme);
+            Q_UNUSED(r);
         }
 
         if (bestInTheme.found)
@@ -131,14 +119,17 @@ int XdgLookup::sizeDistance(const XdgIconDir &dir, int targetSize, int targetSca
 
 // -- private --
 
+static QStringList extensionsForDir(const XdgIconDir &dir) {
+    if (dir.type == XdgIconType::Scalable)
+        return {QStringLiteral(".svg"), QStringLiteral(".svgz"), QStringLiteral(".png"),
+                QStringLiteral(".xpm")};
+    return {QStringLiteral(".png"), QStringLiteral(".svg"), QStringLiteral(".svgz"),
+            QStringLiteral(".xpm")};
+}
+
 QStringList XdgLookup::iconExtensions() {
-    static const QStringList exts = {
-        QStringLiteral(".svg"),
-        QStringLiteral(".svgz"),
-        QStringLiteral(".png"),
-        QStringLiteral(".xpm"),
-    };
-    return exts;
+    return {QStringLiteral(".png"), QStringLiteral(".svg"), QStringLiteral(".svgz"),
+            QStringLiteral(".xpm")};
 }
 
 XdgLookup::Result XdgLookup::findInTheme(const QString &themeRoot, const QString &iconName,
@@ -149,13 +140,11 @@ XdgLookup::Result XdgLookup::findInTheme(const QString &themeRoot, const QString
     if (dirs.isEmpty())
         dirs = XdgIndexParse::fallbackIconDirs(themeRoot);
 
-    static const QStringList exts = iconExtensions();
-
     for (const auto &dir : dirs) {
         if (!dirMatchesIcon(dir, size, scale))
             continue;
 
-        for (const QString &ext : exts) {
+        for (const QString &ext : iconExtensions()) {
             QString path =
                 themeRoot + QLatin1Char('/') + dir.subdir + QLatin1Char('/') + iconName + ext;
             if (QFileInfo::exists(path))
@@ -167,21 +156,31 @@ XdgLookup::Result XdgLookup::findInTheme(const QString &themeRoot, const QString
 }
 
 XdgLookup::Result XdgLookup::findAnySizeInTheme(const QString &themeRoot, const QString &iconName,
-                                                int size, int scale) {
+                                                int size, int scale, int *bestDist,
+                                                XdgLookup::Result *bestResult) {
     auto meta = XdgIndexParse::parseIndexFile(themeRoot);
     QVector<XdgIconDir> dirs = meta.iconDirs;
 
     if (dirs.isEmpty())
         dirs = XdgIndexParse::fallbackIconDirs(themeRoot);
 
-    static const QStringList exts = iconExtensions();
-
     for (const auto &dir : dirs) {
-        for (const QString &ext : exts) {
+        int d = sizeDistance(dir, size, scale);
+        if (bestDist && d >= *bestDist)
+            continue;
+
+        for (const QString &ext : extensionsForDir(dir)) {
             QString path =
                 themeRoot + QLatin1Char('/') + dir.subdir + QLatin1Char('/') + iconName + ext;
-            if (QFileInfo::exists(path))
-                return {path, true};
+            if (QFileInfo::exists(path)) {
+                if (bestDist && bestResult) {
+                    *bestDist = d;
+                    *bestResult = {path, true};
+                } else {
+                    return {path, true};
+                }
+                break;
+            }
         }
     }
 

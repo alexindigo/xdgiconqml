@@ -131,11 +131,11 @@ private slots:
         auto meta = XdgIndexParse::parseIndexFile(tempDir.path() + "/test-sort");
         QCOMPARE(meta.iconDirs.size(), 4);
 
-        QCOMPARE(meta.iconDirs[0].subdir, QString("scalable/apps"));
-        QCOMPARE(meta.iconDirs[0].type, XdgIconType::Scalable);
-        QCOMPARE(meta.iconDirs[1].subdir, QString("256x256/apps"));
+        QCOMPARE(meta.iconDirs[0].subdir, QString("32x32/apps"));
+        QCOMPARE(meta.iconDirs[1].subdir, QString("scalable/apps"));
+        QCOMPARE(meta.iconDirs[1].type, XdgIconType::Scalable);
         QCOMPARE(meta.iconDirs[2].subdir, QString("48x48/apps"));
-        QCOMPARE(meta.iconDirs[3].subdir, QString("32x32/apps"));
+        QCOMPARE(meta.iconDirs[3].subdir, QString("256x256/apps"));
     }
 
     void testParseInheritsOnly() {

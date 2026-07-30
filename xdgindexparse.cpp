@@ -152,23 +152,6 @@ XdgIndexParse::ThemeMeta XdgIndexParse::parseIndexFile(const QString &themeRoot)
         meta.directories.append(name);
     }
 
-    std::stable_sort(allDirNames.begin(), allDirNames.end(),
-                     [&](const QString &a, const QString &b) {
-                         const auto &da = dirMap[a];
-                         const auto &db = dirMap[b];
-                         if (da.scale != db.scale)
-                             return da.scale < db.scale;
-                         if (da.type != db.type) {
-                             if (da.type == XdgIconType::Scalable)
-                                 return true;
-                             if (db.type == XdgIconType::Scalable)
-                                 return false;
-                         }
-                         if (da.maxSize != db.maxSize)
-                             return da.maxSize > db.maxSize;
-                         return da.size > db.size;
-                     });
-
     meta.iconDirs.reserve(allDirNames.size());
     for (const QString &name : allDirNames) {
         const auto &e = dirMap[name];

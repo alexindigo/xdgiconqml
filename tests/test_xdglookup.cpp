@@ -179,11 +179,11 @@ private slots:
     }
 
     void testFindExactMatch() {
-        // Scalable dir matches size 48 too (minSize=1,maxSize=512) and SVG
-        // is sorted first — so the SVG wins. Verify icon found in mytheme.
+        // Directories=48x48/apps,scalable/apps — 48x48/apps first in file order.
+        // At size 48, the Fixed 48x48 PNG must win over the Scalable SVG.
         auto result = XdgLookup::lookupIcon("icon", 48, 1, searchPaths(), themeChain());
         QVERIFY(result.found);
-        QVERIFY(result.path.contains("mytheme"));
+        QVERIFY(result.path.endsWith("mytheme/48x48/apps/icon.png"));
     }
 
     void testFindScalableSVG() {
