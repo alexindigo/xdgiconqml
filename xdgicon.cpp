@@ -1,9 +1,23 @@
 #include "xdgicon.h"
 #include "xdgresolver.h"
 
+#include <QDir>
 #include <QFileInfo>
 
 XdgIcon::XdgIcon(QObject *parent) : QObject(parent) {}
+
+XdgIcon::~XdgIcon() {
+    if (m_listenerId)
+        XdgResolver::instance()->removeInvalidationListener(m_listenerId);
+}
+
+void XdgIcon::componentComplete() {
+    m_listenerId = XdgResolver::instance()->addInvalidationListener([this](const QString &name) {
+        if (name.isEmpty() || name == m_name)
+            QMetaObject::invokeMethod(this, [this] { resolve(); }, Qt::QueuedConnection);
+    });
+    resolve();
+}
 
 QString XdgIcon::name() const {
     return m_name;
@@ -96,27 +110,19 @@ void XdgIcon::resolve(bool /*force*/) {
 
     auto result = XdgResolver::instance()->lookupIcon(m_name, m_size, m_scale, m_themeOverride);
 
-    if (result.found) {
-        QUrl newUrl = QUrl::fromLocalFile(result.path);
-        if (m_path != newUrl || !m_found) {
-            m_found = true;
-            m_path = newUrl;
+    QUrl newUrl = result.found ? QUrl::fromLocalFile(result.path) : QUrl();
+    if (m_path != newUrl || m_found != result.found) {
+        m_found = result.found;
+        m_path = newUrl;
+        m_extension.clear();
+        if (result.found) {
             QFileInfo fi(result.path);
             m_extension = fi.suffix();
+        }
 
-            emit foundChanged();
-            emit pathChanged();
-            emit extensionChanged();
-        }
-    } else {
-        if (m_found) {
-            m_found = false;
-            m_path.clear();
-            m_extension.clear();
-            emit foundChanged();
-            emit pathChanged();
-            emit extensionChanged();
-        }
+        emit foundChanged();
+        emit pathChanged();
+        emit extensionChanged();
     }
 }
 

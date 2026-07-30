@@ -2,14 +2,12 @@
 #define XDGICON_H
 
 #include <QObject>
-#include <QUrl>
 #include <QStringList>
+#include <QUrl>
+#include <QtQml/qqmlparserstatus.h>
 #include <QtQml/qqmlregistration.h>
 
-class XdgIconTheme;
-class XdgCache;
-
-class XdgIcon : public QObject {
+class XdgIcon : public QObject, public QQmlParserStatus {
     Q_OBJECT
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(int size READ size WRITE setSize NOTIFY sizeChanged)
@@ -21,9 +19,11 @@ class XdgIcon : public QObject {
     Q_PROPERTY(QString extension READ extension NOTIFY extensionChanged)
     Q_PROPERTY(bool isSymbolic READ isSymbolic NOTIFY isSymbolicChanged)
     QML_ELEMENT
+    Q_INTERFACES(QQmlParserStatus)
 
 public:
     explicit XdgIcon(QObject *parent = nullptr);
+    ~XdgIcon() override;
 
     QString name() const;
     void setName(const QString &name);
@@ -56,10 +56,13 @@ signals:
     void extensionChanged();
     void isSymbolicChanged();
 
+protected:
+    void componentComplete() override;
+    void classBegin() override {}
+
 private:
     void resolve(bool force = false);
-    static QStringList effectiveSearchPaths();
-    static QStringList effectiveThemeChain(const QString &themeOverride);
+    void updateFromResult(const QUrl &newPath, bool newFound);
 
     QString m_name;
     int m_size = 48;
@@ -69,6 +72,7 @@ private:
     bool m_found = false;
     QString m_extension;
     bool m_isSymbolic = false;
+    int m_listenerId = 0;
 };
 
 #endif // XDGICON_H
