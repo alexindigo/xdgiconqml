@@ -1,13 +1,7 @@
 #include "xdgicon.h"
-#include "xdgcache.h"
-#include "xdgicontheme.h"
-#include "xdgindexparse.h"
-#include "xdglookup.h"
+#include "xdgresolver.h"
 
-#include <QDir>
 #include <QFileInfo>
-
-static XdgCache s_cache;
 
 XdgIcon::XdgIcon(QObject *parent) : QObject(parent) {}
 
@@ -73,10 +67,12 @@ bool XdgIcon::isSymbolic() const {
 }
 
 void XdgIcon::reload(bool force) {
-    resolve(force);
+    if (force)
+        XdgResolver::instance()->invalidateName(m_name);
+    resolve();
 }
 
-void XdgIcon::resolve(bool force) {
+void XdgIcon::resolve(bool /*force*/) {
     bool wasSymbolic = m_isSymbolic;
     m_isSymbolic = m_name.endsWith(QStringLiteral("-symbolic"));
     bool symbolicChanged = (wasSymbolic != m_isSymbolic);
@@ -98,50 +94,9 @@ void XdgIcon::resolve(bool force) {
     if (symbolicChanged)
         emit isSymbolicChanged();
 
-    QStringList themes = effectiveThemeChain(m_themeOverride);
-    QStringList paths = effectiveSearchPaths();
-
-    QString key = XdgCache::makeKey(m_name, m_size, m_scale, themes.join(QLatin1Char(',')));
-
-    if (!force) {
-        XdgCacheEntry cached = s_cache.lookup(key);
-        if (cached.path.isEmpty() && s_cache.contains(key)) {
-            if (m_found) {
-                m_found = false;
-                m_path.clear();
-                m_extension.clear();
-                emit foundChanged();
-                emit pathChanged();
-                emit extensionChanged();
-            }
-            return;
-        }
-
-        if (!cached.path.isEmpty()) {
-            QString newPath = cached.path;
-            if (m_path.toLocalFile() != newPath) {
-                m_found = true;
-                m_path = QUrl::fromLocalFile(newPath);
-                QFileInfo fi(newPath);
-                m_extension = fi.suffix();
-
-                emit foundChanged();
-                emit pathChanged();
-                emit extensionChanged();
-            }
-            return;
-        }
-    }
-
-    auto result = XdgLookup::lookupIcon(m_name, m_size, m_scale, paths, themes);
+    auto result = XdgResolver::instance()->lookupIcon(m_name, m_size, m_scale, m_themeOverride);
 
     if (result.found) {
-        XdgCacheEntry entry;
-        entry.path = result.path;
-        entry.size = m_size;
-        entry.scale = m_scale;
-        s_cache.insert(key, entry);
-
         QUrl newUrl = QUrl::fromLocalFile(result.path);
         if (m_path != newUrl || !m_found) {
             m_found = true;
@@ -154,10 +109,6 @@ void XdgIcon::resolve(bool force) {
             emit extensionChanged();
         }
     } else {
-        XdgCacheEntry missEntry;
-        missEntry.path = QString();
-        s_cache.insert(key, missEntry);
-
         if (m_found) {
             m_found = false;
             m_path.clear();
@@ -169,45 +120,6 @@ void XdgIcon::resolve(bool force) {
     }
 }
 
-QStringList XdgIcon::effectiveSearchPaths() {
-    XdgIconTheme *theme = XdgIconTheme::instance();
-    if (theme) {
-        QStringList paths = theme->searchPaths();
-        if (!paths.isEmpty())
-            return paths;
-    }
-    return XdgLookup::xdgIconPaths();
-}
-
-QStringList XdgIcon::effectiveThemeChain(const QString &themeOverride) {
-    XdgIconTheme *theme = XdgIconTheme::instance();
-
-    if (!themeOverride.isEmpty()) {
-        QStringList chain;
-        chain.append(themeOverride);
-        if (theme) {
-            for (const QString &base : theme->searchPaths()) {
-                auto meta = XdgIndexParse::parseIndexFile(base + QLatin1Char('/') + themeOverride);
-                if (!meta.themeName.isEmpty()) {
-                    for (const QString &parent : meta.inherits)
-                        chain.append(parent);
-                    break;
-                }
-            }
-        }
-        if (!chain.contains(QStringLiteral("hicolor")))
-            chain.append(QStringLiteral("hicolor"));
-        return chain;
-    }
-
-    if (theme) {
-        QStringList chain = theme->themeChain();
-        if (!chain.isEmpty())
-            return chain;
-    }
-    return {QStringLiteral("hicolor")};
-}
-
 void XdgIcon::invalidateCacheForName(const QString &name) {
-    s_cache.invalidateName(name);
+    XdgResolver::instance()->invalidateName(name);
 }

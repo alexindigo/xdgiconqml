@@ -1,10 +1,65 @@
 #include "xdgresolver.h"
 
 #include <QDir>
+#include <QFile>
 #include <QFileInfo>
+#include <QSettings>
 #include <QStandardPaths>
 
 #include "xdglookup.h"
+
+namespace {
+
+QString readGtkConfigTheme(const QString &configPath) {
+    QFile file(configPath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return {};
+
+    while (!file.atEnd()) {
+        QString line = QString::fromUtf8(file.readLine()).trimmed();
+        if (line.startsWith(QStringLiteral("gtk-icon-theme-name"))) {
+            int eq = line.indexOf(QLatin1Char('='));
+            if (eq >= 0)
+                return line.mid(eq + 1).trimmed();
+        }
+    }
+    return {};
+}
+
+QString readQt6CtTheme() {
+    QString path = QDir::homePath() + QStringLiteral("/.config/qt6ct/qt6ct.conf");
+    if (!QFileInfo::exists(path))
+        return {};
+
+    QSettings settings(path, QSettings::IniFormat);
+    settings.beginGroup(QStringLiteral("Appearance"));
+    QString theme = settings.value(QStringLiteral("icon_theme")).toString();
+    settings.endGroup();
+    return theme;
+}
+
+QString themeFromEnvOrConfig() {
+    if (!qEnvironmentVariableIsEmpty("QS_ICON_THEME"))
+        return qEnvironmentVariable("QS_ICON_THEME");
+
+    QString gtkTheme =
+        readGtkConfigTheme(QDir::homePath() + QStringLiteral("/.config/gtk-3.0/settings.ini"));
+    if (!gtkTheme.isEmpty())
+        return gtkTheme;
+
+    gtkTheme =
+        readGtkConfigTheme(QDir::homePath() + QStringLiteral("/.config/gtk-4.0/settings.ini"));
+    if (!gtkTheme.isEmpty())
+        return gtkTheme;
+
+    QString qt6ct = readQt6CtTheme();
+    if (!qt6ct.isEmpty())
+        return qt6ct;
+
+    return {};
+}
+
+} // namespace
 
 // -- instance --
 
@@ -93,10 +148,10 @@ QStringList XdgResolver::detectSearchPaths() {
 }
 
 QString XdgResolver::detectCurrentTheme() {
-    // QS_ICON_THEME env var override — read from XdgIconTheme's detection
-    // logic. For now, default to hicolor; plan 03 commit 3 migrates full
-    // detection from XdgIconTheme.
-    return QStringLiteral("hicolor");
+    QString theme = themeFromEnvOrConfig();
+    if (theme.isEmpty())
+        theme = QStringLiteral("hicolor");
+    return theme;
 }
 
 QStringList XdgResolver::themeChainFor(const QString &theme, const QStringList &searchPaths) {
