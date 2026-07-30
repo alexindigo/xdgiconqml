@@ -32,6 +32,8 @@ set(XDGICONQML_SOURCES
     xdgindexparse.h
     xdglookup.cpp
     xdglookup.h
+    xdgresolver.cpp
+    xdgresolver.h
     xdgpathwatcher.cpp
     xdgpathwatcher.h
     xdgthemewatcher.cpp
