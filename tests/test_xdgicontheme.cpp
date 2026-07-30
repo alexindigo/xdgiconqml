@@ -116,7 +116,7 @@ private slots:
         QSignalSpy spyPaths(&theme, &XdgIconTheme::searchPathsChanged);
 
         theme.rescan();
-        // At minimum, searchPathsChanged fires (even if paths unchanged)
+        QCOMPARE(spyReload.count(), 1);
         QVERIFY(spyPaths.count() >= 1);
     }
 
