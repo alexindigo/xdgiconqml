@@ -38,8 +38,6 @@ set(XDGICONQML_SOURCES
     xdgpathwatcher.h
     xdgthemewatcher.cpp
     xdgthemewatcher.h
-    xdgcache.cpp
-    xdgcache.h
     xdgbroadcast.cpp
     xdgbroadcast.h
     xdgtypes.h
@@ -148,8 +146,8 @@ if(BUILD_TEST_MODE)
     endmacro()
 
     add_xdgiconqml_test(test_xdgindexparse)
+    add_xdgiconqml_test(test_xdgresolver)
     add_xdgiconqml_test(test_xdglookup)
-    add_xdgiconqml_test(test_xdgcache)
     add_xdgiconqml_test(test_xdgicon)
     add_xdgiconqml_test(test_xdgicontheme)
 endif()

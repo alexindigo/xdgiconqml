@@ -1,8 +1,8 @@
-#include <QCoreApplication>
 #include <QCommandLineParser>
+#include <QCoreApplication>
 #include <QTextStream>
 
-#include "xdgindexparse.h"
+#include "xdgresolver.h"
 #include "xdglookup.h"
 
 int main(int argc, char *argv[]) {
@@ -23,64 +23,38 @@ int main(int argc, char *argv[]) {
     parser.process(app);
 
     QTextStream out(stdout);
+    XdgResolver *r = XdgResolver::instance();
 
     if (parser.isSet("paths")) {
         out << "Search paths:\n";
-        for (const auto &p : XdgLookup::xdgIconPaths())
+        for (const auto &p : r->searchPaths())
             out << "  " << p << "\n";
         return 0;
     }
 
     if (parser.isSet("chain")) {
-        out << "Theme chain:\n";
         QString theme = parser.value("theme");
-        if (theme.isEmpty())
-            theme = "hicolor";
-        QStringList chain;
-        chain.append(theme);
-        QStringList searchPaths = XdgLookup::xdgIconPaths();
-        for (const auto &base : searchPaths) {
-            auto meta = XdgIndexParse::parseIndexFile(base + "/" + theme);
-            if (!meta.themeName.isEmpty()) {
-                for (const auto &parent : meta.inherits)
-                    chain.append(parent);
-                break;
-            }
-        }
-        if (!chain.contains("hicolor"))
-            chain.append("hicolor");
-        for (const auto &t : chain)
+        if (!theme.isEmpty())
+            r->setCurrentTheme(theme);
+
+        out << "Theme chain:\n";
+        for (const auto &t : r->themeChain())
             out << "  " << t << "\n";
         return 0;
     }
 
-    if (parser.positionalArguments().isEmpty()) {
+    if (parser.positionalArguments().isEmpty())
         parser.showHelp(1);
-    }
 
     QString iconName = parser.positionalArguments().first();
     int size = parser.value("size").toInt();
     int scale = parser.value("scale").toInt();
     QString theme = parser.value("theme");
 
-    QStringList searchPaths = XdgLookup::xdgIconPaths();
+    if (!theme.isEmpty())
+        r->setCurrentTheme(theme);
 
-    QStringList chain;
-    if (theme.isEmpty())
-        theme = "hicolor";
-    chain.append(theme);
-    for (const auto &base : searchPaths) {
-        auto meta = XdgIndexParse::parseIndexFile(base + "/" + theme);
-        if (!meta.themeName.isEmpty()) {
-            for (const auto &parent : meta.inherits)
-                chain.append(parent);
-            break;
-        }
-    }
-    if (!chain.contains("hicolor"))
-        chain.append("hicolor");
-
-    auto result = XdgLookup::lookupIcon(iconName, size, scale, searchPaths, chain);
+    auto result = r->lookupIcon(iconName, size, scale);
 
     if (result.found) {
         out << result.path << "\n";
