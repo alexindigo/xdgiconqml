@@ -189,26 +189,53 @@ XdgIndexParse::ThemeMeta XdgIndexParse::parseIndexFile(const QString &themeRoot)
 
 QVector<XdgIconDir> XdgIndexParse::fallbackIconDirs(const QString &themeRoot) {
     QVector<XdgIconDir> dirs;
-    static const char *fallbacks[] = {
-        "scalable/apps", "scalable", "256x256/apps", "256x256", "128x128/apps", "128x128",
-        "64x64/apps",    "64x64",    "48x48/apps",   "48x48",   "32x32/apps",   "32x32",
-    };
+    QDir root(themeRoot);
+    if (!root.exists())
+        return dirs;
 
-    for (const char *path : fallbacks) {
-        QString fullPath = themeRoot + QLatin1Char('/') + QLatin1String(path);
-        if (!QDir(fullPath).exists())
-            continue;
+    // Walk all subdirectories. Add any directory that either:
+    // - has a size pattern in its path (e.g. contains "48x48" or "scalable")
+    // - is a leaf (no further subdirectories) — likely a context dir like "apps"
+    QStringList stack;
+    for (const auto &top : root.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
+        stack.append(top);
 
-        XdgIconDir dir;
-        dir.subdir = QString::fromLatin1(path);
-        dir.size = sizeFromDirName(dir.subdir);
-        dir.type = (dir.subdir.contains(QStringLiteral("scalable"))) ? XdgIconType::Scalable
-                                                                     : XdgIconType::Threshold;
-        dir.maxSize = dir.size;
-        dir.minSize = dir.size;
-        dir.threshold = 2;
-        dir.scale = 1;
-        dirs.append(dir);
+    while (!stack.isEmpty()) {
+        QString rel = stack.takeFirst();
+        QDir d(root.absoluteFilePath(rel));
+        const auto subs = d.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+        int sz = sizeFromDirName(rel);
+        bool hasSize = (sz > 0 || rel.contains(QStringLiteral("scalable")));
+
+        if (hasSize || subs.isEmpty()) {
+            // If no size, derive from path segments (e.g. "hicolor/512x512/apps"
+            // → size 512 from the "512x512" segment).
+            if (!hasSize) {
+                for (const auto &seg : rel.split(QLatin1Char('/'))) {
+                    int s = sizeFromDirName(seg);
+                    if (s > 0 || seg.contains(QStringLiteral("scalable"))) {
+                        sz = s;
+                        hasSize = true;
+                        break;
+                    }
+                }
+            }
+
+            XdgIconDir dir;
+            dir.subdir = rel;
+            dir.size = hasSize ? sz : 0;
+            dir.type = rel.contains(QStringLiteral("scalable")) ? XdgIconType::Scalable
+                                                                : XdgIconType::Threshold;
+            dir.maxSize = dir.size;
+            dir.minSize = dir.size;
+            dir.threshold = 2;
+            dir.scale = 1;
+            dirs.append(dir);
+        }
+
+        for (const auto &sub : subs)
+            stack.append(rel + QLatin1Char('/') + sub);
     }
 
     return dirs;
