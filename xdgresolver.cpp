@@ -11,26 +11,21 @@
 namespace {
 
 QString readGtkConfigTheme(const QString &configPath) {
-    QFile file(configPath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (!QFileInfo::exists(configPath))
         return {};
-
-    while (!file.atEnd()) {
-        QString line = QString::fromUtf8(file.readLine()).trimmed();
-        if (line.startsWith(QStringLiteral("gtk-icon-theme-name"))) {
-            int eq = line.indexOf(QLatin1Char('='));
-            if (eq >= 0)
-                return line.mid(eq + 1).trimmed();
-        }
-    }
-    return {};
+    QSettings s(configPath, QSettings::IniFormat);
+    s.beginGroup(QStringLiteral("Settings"));
+    QString theme = s.value(QStringLiteral("gtk-icon-theme-name")).toString();
+    s.endGroup();
+    if (theme.size() >= 2 && theme.startsWith(QLatin1Char('"')) && theme.endsWith(QLatin1Char('"')))
+        theme = theme.mid(1, theme.size() - 2);
+    return theme;
 }
 
 QString readQt6CtTheme() {
     QString path = QDir::homePath() + QStringLiteral("/.config/qt6ct/qt6ct.conf");
     if (!QFileInfo::exists(path))
         return {};
-
     QSettings settings(path, QSettings::IniFormat);
     settings.beginGroup(QStringLiteral("Appearance"));
     QString theme = settings.value(QStringLiteral("icon_theme")).toString();
@@ -38,23 +33,61 @@ QString readQt6CtTheme() {
     return theme;
 }
 
+QString readKdeGlobalsTheme() {
+    QString path = QDir::homePath() + QStringLiteral("/.config/kdeglobals");
+    if (!QFileInfo::exists(path))
+        return {};
+    QSettings s(path, QSettings::IniFormat);
+    s.beginGroup(QStringLiteral("Icons"));
+    QString theme = s.value(QStringLiteral("Theme")).toString();
+    s.endGroup();
+    return theme;
+}
+
 QString themeFromEnvOrConfig() {
     if (!qEnvironmentVariableIsEmpty("QS_ICON_THEME"))
         return qEnvironmentVariable("QS_ICON_THEME");
 
-    QString gtkTheme =
-        readGtkConfigTheme(QDir::homePath() + QStringLiteral("/.config/gtk-3.0/settings.ini"));
-    if (!gtkTheme.isEmpty())
-        return gtkTheme;
+    QString platform = qEnvironmentVariable("QT_QPA_PLATFORMTHEME");
+    if (!platform.isEmpty()) {
+        if (platform == QLatin1String("gtk3") || platform == QLatin1String("gtk") ||
+            platform == QLatin1String("gtk4")) {
+            for (const QString &v : {QStringLiteral("gtk-3.0"), QStringLiteral("gtk-4.0")}) {
+                QString t = readGtkConfigTheme(QDir::homePath() + QStringLiteral("/.config/") + v +
+                                               QStringLiteral("/settings.ini"));
+                if (!t.isEmpty())
+                    return t;
+            }
+        } else if (platform == QLatin1String("qt6ct")) {
+            QString t = readQt6CtTheme();
+            if (!t.isEmpty())
+                return t;
+        } else if (platform == QLatin1String("kde") || platform == QLatin1String("kde5") ||
+                   platform == QLatin1String("kde6")) {
+            QString t = readKdeGlobalsTheme();
+            if (!t.isEmpty())
+                return t;
+        }
+    }
 
-    gtkTheme =
-        readGtkConfigTheme(QDir::homePath() + QStringLiteral("/.config/gtk-4.0/settings.ini"));
-    if (!gtkTheme.isEmpty())
-        return gtkTheme;
+    for (const QString &v : {QStringLiteral("gtk-3.0"), QStringLiteral("gtk-4.0")}) {
+        QString t = readGtkConfigTheme(QDir::homePath() + QStringLiteral("/.config/") + v +
+                                       QStringLiteral("/settings.ini"));
+        if (!t.isEmpty())
+            return t;
+    }
 
-    QString qt6ct = readQt6CtTheme();
-    if (!qt6ct.isEmpty())
-        return qt6ct;
+    {
+        QString t = readQt6CtTheme();
+        if (!t.isEmpty())
+            return t;
+    }
+
+    {
+        QString t = readKdeGlobalsTheme();
+        if (!t.isEmpty())
+            return t;
+    }
 
     return {};
 }
@@ -144,7 +177,25 @@ XdgLookup::Result XdgResolver::lookupIcon(const QString &name, int size, int sca
 // -- detection --
 
 QStringList XdgResolver::detectSearchPaths() {
-    return XdgLookup::xdgIconPaths();
+    QStringList paths;
+    auto add = [&](const QString &p) {
+        if (!p.isEmpty() && !paths.contains(p))
+            paths.append(p);
+    };
+
+    add(QDir::homePath() + QStringLiteral("/.local/share/icons"));
+    add(QDir::homePath() + QStringLiteral("/.icons"));
+
+    for (const QString &d : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation))
+        add(d + QStringLiteral("/icons"));
+
+    add(QStringLiteral("/usr/local/share/icons"));
+    add(QStringLiteral("/usr/share/pixmaps"));
+    add(QStringLiteral("/run/current-system/sw/share/icons"));
+    add(QStringLiteral("/var/lib/flatpak/exports/share/icons"));
+    add(QDir::homePath() + QStringLiteral("/.local/share/flatpak/exports/share/icons"));
+
+    return paths;
 }
 
 QString XdgResolver::detectCurrentTheme() {
