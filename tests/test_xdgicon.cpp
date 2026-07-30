@@ -6,14 +6,12 @@
 
 #include "xdgicon.h"
 
-class TestXdgIcon : public QObject
-{
+class TestXdgIcon : public QObject {
     Q_OBJECT
 
     QTemporaryDir m_fixture;
 
-    void setupTree()
-    {
+    void setupTree() {
         QDir root(m_fixture.path());
         root.mkpath("hicolor/48x48/apps");
         root.mkpath("hicolor/scalable/apps");
@@ -21,13 +19,12 @@ class TestXdgIcon : public QObject
         {
             QFile f(root.filePath("hicolor/index.theme"));
             QVERIFY(f.open(QIODevice::WriteOnly));
-            QTextStream(&f)
-                << "[Icon Theme]\n"
-                << "Directories=scalable/apps,48x48/apps\n"
-                << "\n"
-                << "[scalable/apps]\nSize=48\nType=Scalable\nMinSize=1\nMaxSize=512\n"
-                << "\n"
-                << "[48x48/apps]\nSize=48\nType=Fixed\n";
+            QTextStream(&f) << "[Icon Theme]\n"
+                            << "Directories=scalable/apps,48x48/apps\n"
+                            << "\n"
+                            << "[scalable/apps]\nSize=48\nType=Scalable\nMinSize=1\nMaxSize=512\n"
+                            << "\n"
+                            << "[48x48/apps]\nSize=48\nType=Fixed\n";
             f.close();
         }
         {
@@ -47,8 +44,7 @@ class TestXdgIcon : public QObject
 private slots:
     void initTestCase() { setupTree(); }
 
-    void testDefaults()
-    {
+    void testDefaults() {
         XdgIcon icon;
         QVERIFY(icon.name().isEmpty());
         QCOMPARE(icon.size(), 48);
@@ -59,15 +55,13 @@ private slots:
         QVERIFY(!icon.isSymbolic());
     }
 
-    void testEmptyName()
-    {
+    void testEmptyName() {
         XdgIcon icon;
         icon.setName("");
         QVERIFY(!icon.found());
     }
 
-    void testPropertySetters()
-    {
+    void testPropertySetters() {
         XdgIcon icon;
         QSignalSpy spy(&icon, &XdgIcon::nameChanged);
         icon.setName("test");
@@ -76,8 +70,7 @@ private slots:
         QCOMPARE(spy.count(), 1);
     }
 
-    void testSizeValidation()
-    {
+    void testSizeValidation() {
         XdgIcon icon;
         QSignalSpy spy(&icon, &XdgIcon::sizeChanged);
         icon.setSize(0);
@@ -90,8 +83,7 @@ private slots:
         QCOMPARE(icon.size(), 64);
     }
 
-    void testScaleValidation()
-    {
+    void testScaleValidation() {
         XdgIcon icon;
         QSignalSpy spy(&icon, &XdgIcon::scaleChanged);
         icon.setScale(0);
@@ -101,8 +93,7 @@ private slots:
         QCOMPARE(icon.scale(), 2);
     }
 
-    void testThemeOverride()
-    {
+    void testThemeOverride() {
         XdgIcon icon;
         QSignalSpy spy(&icon, &XdgIcon::themeOverrideChanged);
         icon.setThemeOverride("Adwaita");
@@ -111,8 +102,7 @@ private slots:
         QCOMPARE(spy.count(), 1);
     }
 
-    void testIsSymbolic()
-    {
+    void testIsSymbolic() {
         XdgIcon icon;
         QSignalSpy spy(&icon, &XdgIcon::isSymbolicChanged);
         icon.setName("chat-symbolic");
@@ -122,8 +112,7 @@ private slots:
         QVERIFY(!icon.isSymbolic());
     }
 
-    void testReload()
-    {
+    void testReload() {
         XdgIcon icon;
         icon.setName("nonexistent-icon");
         // Reload on empty result shouldn't crash

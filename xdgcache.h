@@ -14,8 +14,7 @@ struct XdgCacheEntry {
     QDateTime timestamp;
 };
 
-class XdgCache : public QObject
-{
+class XdgCache : public QObject {
     Q_OBJECT
     Q_PROPERTY(int maxEntries READ maxEntries WRITE setMaxEntries NOTIFY maxEntriesChanged)
     Q_PROPERTY(int count READ count NOTIFY countChanged)
@@ -23,8 +22,7 @@ class XdgCache : public QObject
 public:
     explicit XdgCache(QObject *parent = nullptr);
 
-    static QString makeKey(const QString &name, int size,
-                           int scale, const QString &theme);
+    static QString makeKey(const QString &name, int size, int scale, const QString &theme);
 
     void insert(const QString &key, const XdgCacheEntry &entry);
     XdgCacheEntry lookup(const QString &key) const;

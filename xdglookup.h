@@ -7,8 +7,7 @@
 
 #include "xdgtypes.h"
 
-class XdgLookup
-{
+class XdgLookup {
 public:
     struct Result {
         QString path;
@@ -17,32 +16,20 @@ public:
 
     static QStringList xdgIconPaths();
 
-    static Result lookupIcon(const QString &iconName,
-                             int size,
-                             int scale,
-                             const QStringList &searchPaths,
-                             const QStringList &themeChain);
+    static Result lookupIcon(const QString &iconName, int size, int scale,
+                             const QStringList &searchPaths, const QStringList &themeChain);
 
-    static bool dirMatchesIcon(const XdgIconDir &dir,
-                                int targetSize,
-                                int targetScale);
+    static bool dirMatchesIcon(const XdgIconDir &dir, int targetSize, int targetScale);
 
-    static int sizeDistance(const XdgIconDir &dir,
-                            int targetSize,
-                            int targetScale);
+    static int sizeDistance(const XdgIconDir &dir, int targetSize, int targetScale);
 
 private:
     static QStringList iconExtensions();
-    static Result findInTheme(const QString &themeRoot,
-                              const QString &iconName,
-                              int size,
+    static Result findInTheme(const QString &themeRoot, const QString &iconName, int size,
                               int scale);
-    static Result findAnySizeInTheme(const QString &themeRoot,
-                                     const QString &iconName,
-                                     int size,
+    static Result findAnySizeInTheme(const QString &themeRoot, const QString &iconName, int size,
                                      int scale);
-    static QString findLooseIcon(const QString &iconName,
-                                 const QStringList &searchPaths);
+    static QString findLooseIcon(const QString &iconName, const QStringList &searchPaths);
 };
 
 #endif // XDGLOOKUP_H

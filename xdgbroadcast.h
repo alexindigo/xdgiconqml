@@ -11,8 +11,7 @@
 #include <QHash>
 #endif
 
-class XdgBroadcast : public QObject
-{
+class XdgBroadcast : public QObject {
     Q_OBJECT
 
 public:
@@ -32,9 +31,8 @@ private:
     bool isDampened(const QString &name);
     void markBroadcasted(const QString &name);
 
-    Q_INVOKABLE void onSettingChanged(const QString &ns,
-                                       const QString &key,
-                                       const QDBusVariant &value);
+    Q_INVOKABLE void onSettingChanged(const QString &ns, const QString &key,
+                                      const QDBusVariant &value);
     Q_INVOKABLE void onIconChanged(const QString &name);
 
     QDBusConnection m_connection;

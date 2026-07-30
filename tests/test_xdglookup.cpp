@@ -7,8 +7,7 @@
 #include "xdglookup.h"
 #include "xdgindexparse.h"
 
-class TestXdgLookup : public QObject
-{
+class TestXdgLookup : public QObject {
     Q_OBJECT
 
     QTemporaryDir m_fixture;
@@ -26,8 +25,7 @@ class TestXdgLookup : public QObject
     //     index.theme  (no Inherits)
     //     48x48/apps/hicolor.png
     //   bare-icon-in-base.png  (loose file)
-    void setupTree()
-    {
+    void setupTree() {
         QDir root(m_fixture.path());
 
         // mytheme
@@ -37,17 +35,17 @@ class TestXdgLookup : public QObject
 
         QFile index1(mytheme.filePath("index.theme"));
         QVERIFY(index1.open(QIODevice::WriteOnly | QIODevice::Text));
-        QTextStream(&index1)
-            << "[Icon Theme]\n"
-            << "Inherits=parent\n"
-            << "Directories=48x48/apps,scalable/apps\n"
-            << "\n"
-            << "[48x48/apps]\nSize=48\nType=Fixed\n"
-            << "\n"
-            << "[scalable/apps]\nSize=48\nType=Scalable\nMinSize=1\nMaxSize=512\n";
+        QTextStream(&index1) << "[Icon Theme]\n"
+                             << "Inherits=parent\n"
+                             << "Directories=48x48/apps,scalable/apps\n"
+                             << "\n"
+                             << "[48x48/apps]\nSize=48\nType=Fixed\n"
+                             << "\n"
+                             << "[scalable/apps]\nSize=48\nType=Scalable\nMinSize=1\nMaxSize=512\n";
         index1.close();
 
-        QFile f(nullptr); (void)f;
+        QFile f(nullptr);
+        (void)f;
 
         // mytheme/48x48/apps/icon.png
         {
@@ -71,13 +69,12 @@ class TestXdgLookup : public QObject
 
         QFile index2(parent.filePath("index.theme"));
         QVERIFY(index2.open(QIODevice::WriteOnly | QIODevice::Text));
-        QTextStream(&index2)
-            << "[Icon Theme]\n"
-            << "Directories=32x32/apps,64x64/apps\n"
-            << "\n"
-            << "[32x32/apps]\nSize=32\nType=Fixed\n"
-            << "\n"
-            << "[64x64/apps]\nSize=64\nType=Fixed\n";
+        QTextStream(&index2) << "[Icon Theme]\n"
+                             << "Directories=32x32/apps,64x64/apps\n"
+                             << "\n"
+                             << "[32x32/apps]\nSize=32\nType=Fixed\n"
+                             << "\n"
+                             << "[64x64/apps]\nSize=64\nType=Fixed\n";
         index2.close();
 
         // parent/32x32/apps/icon.png
@@ -101,11 +98,10 @@ class TestXdgLookup : public QObject
 
         QFile index3(hicolor.filePath("index.theme"));
         QVERIFY(index3.open(QIODevice::WriteOnly | QIODevice::Text));
-        QTextStream(&index3)
-            << "[Icon Theme]\n"
-            << "Directories=48x48/apps\n"
-            << "\n"
-            << "[48x48/apps]\nSize=48\nType=Fixed\n";
+        QTextStream(&index3) << "[Icon Theme]\n"
+                             << "Directories=48x48/apps\n"
+                             << "\n"
+                             << "[48x48/apps]\nSize=48\nType=Fixed\n";
         index3.close();
 
         // hicolor/48x48/apps/hicolor.png
@@ -151,85 +147,81 @@ class TestXdgLookup : public QObject
 private slots:
     void initTestCase() { setupTree(); }
 
-    void testDirMatchesIcon()
-    {
-        XdgIconDir d1; d1.type = XdgIconType::Fixed; d1.size = 48; d1.scale = 1;
+    void testDirMatchesIcon() {
+        XdgIconDir d1;
+        d1.type = XdgIconType::Fixed;
+        d1.size = 48;
+        d1.scale = 1;
         QVERIFY(XdgLookup::dirMatchesIcon(d1, 48, 1));
         QVERIFY(!XdgLookup::dirMatchesIcon(d1, 32, 1));
         QVERIFY(!XdgLookup::dirMatchesIcon(d1, 48, 2));
 
-        XdgIconDir d2; d2.type = XdgIconType::Scalable; d2.size = 48;
-        d2.minSize = 1; d2.maxSize = 512; d2.scale = 1;
+        XdgIconDir d2;
+        d2.type = XdgIconType::Scalable;
+        d2.size = 48;
+        d2.minSize = 1;
+        d2.maxSize = 512;
+        d2.scale = 1;
         QVERIFY(XdgLookup::dirMatchesIcon(d2, 48, 1));
         QVERIFY(XdgLookup::dirMatchesIcon(d2, 256, 1));
         QVERIFY(!XdgLookup::dirMatchesIcon(d2, 0, 1));
         QVERIFY(!XdgLookup::dirMatchesIcon(d2, 1024, 1));
 
-        XdgIconDir d3; d3.type = XdgIconType::Threshold; d3.size = 48;
-        d3.threshold = 2; d3.scale = 1;
+        XdgIconDir d3;
+        d3.type = XdgIconType::Threshold;
+        d3.size = 48;
+        d3.threshold = 2;
+        d3.scale = 1;
         QVERIFY(XdgLookup::dirMatchesIcon(d3, 48, 1));
         QVERIFY(XdgLookup::dirMatchesIcon(d3, 46, 1));
         QVERIFY(XdgLookup::dirMatchesIcon(d3, 50, 1));
         QVERIFY(!XdgLookup::dirMatchesIcon(d3, 44, 1));
     }
 
-    void testFindExactMatch()
-    {
+    void testFindExactMatch() {
         // Scalable dir matches size 48 too (minSize=1,maxSize=512) and SVG
         // is sorted first — so the SVG wins. Verify icon found in mytheme.
-        auto result = XdgLookup::lookupIcon("icon", 48, 1,
-                                            searchPaths(), themeChain());
+        auto result = XdgLookup::lookupIcon("icon", 48, 1, searchPaths(), themeChain());
         QVERIFY(result.found);
         QVERIFY(result.path.contains("mytheme"));
     }
 
-    void testFindScalableSVG()
-    {
-        auto result = XdgLookup::lookupIcon("icon", 128, 1,
-                                            searchPaths(), themeChain());
+    void testFindScalableSVG() {
+        auto result = XdgLookup::lookupIcon("icon", 128, 1, searchPaths(), themeChain());
         QVERIFY(result.found);
         QVERIFY(result.path.contains("scalable/apps/icon.svg"));
     }
 
-    void testFindInParentTheme()
-    {
-        auto result = XdgLookup::lookupIcon("icon", 32, 1,
-                                            {"mytheme-not-found"}, {"mytheme", "parent"});
+    void testFindInParentTheme() {
+        auto result =
+            XdgLookup::lookupIcon("icon", 32, 1, {"mytheme-not-found"}, {"mytheme", "parent"});
         QVERIFY(!result.found);
 
-        auto result2 = XdgLookup::lookupIcon("icon", 32, 1,
-                                             searchPaths(), {"parent", "hicolor"});
+        auto result2 = XdgLookup::lookupIcon("icon", 32, 1, searchPaths(), {"parent", "hicolor"});
         QVERIFY(result2.found);
         QVERIFY(result2.path.contains("32x32/apps/icon.png"));
     }
 
-    void testParentOnlyIcon()
-    {
-        auto result = XdgLookup::lookupIcon("parentonly", 64, 1,
-                                            searchPaths(), themeChain());
+    void testParentOnlyIcon() {
+        auto result = XdgLookup::lookupIcon("parentonly", 64, 1, searchPaths(), themeChain());
         QVERIFY(result.found);
         QVERIFY(result.path.contains("64x64/apps/parentonly.png"));
         QVERIFY(result.path.contains("parent"));
     }
 
-    void testHicolorFallback()
-    {
-        auto result = XdgLookup::lookupIcon("hicolor", 48, 1,
-                                            searchPaths(), {"parent", "hicolor"});
+    void testHicolorFallback() {
+        auto result = XdgLookup::lookupIcon("hicolor", 48, 1, searchPaths(), {"parent", "hicolor"});
         QVERIFY(result.found);
         QVERIFY(result.path.contains("hicolor/48x48/apps/hicolor.png"));
     }
 
-    void testMissingIcon()
-    {
-        auto result = XdgLookup::lookupIcon("nonexistent", 48, 1,
-                                            searchPaths(), themeChain());
+    void testMissingIcon() {
+        auto result = XdgLookup::lookupIcon("nonexistent", 48, 1, searchPaths(), themeChain());
         QVERIFY(!result.found);
         QVERIFY(result.path.isEmpty());
     }
 
-    void testAbsolutePath()
-    {
+    void testAbsolutePath() {
         QString path = m_fixture.path() + "/test-abspath.png";
         QFile f(path);
         QVERIFY(f.open(QIODevice::WriteOnly));
@@ -240,80 +232,74 @@ private slots:
         QVERIFY(result.found);
         QCOMPARE(result.path, path);
 
-        auto result2 = XdgLookup::lookupIcon("/no/such/path.png", 48, 1,
-                                             {}, {});
+        auto result2 = XdgLookup::lookupIcon("/no/such/path.png", 48, 1, {}, {});
         QVERIFY(!result2.found);
     }
 
-    void testLooseFileFallback()
-    {
+    void testLooseFileFallback() {
         QStringList paths = {m_fixture.path()};
-        auto result = XdgLookup::lookupIcon("bare-icon-in-base", 48, 1,
-                                            paths, {"nonexistent"});
+        auto result = XdgLookup::lookupIcon("bare-icon-in-base", 48, 1, paths, {"nonexistent"});
         QVERIFY(result.found);
         QVERIFY(result.path.contains("bare-icon-in-base.png"));
     }
 
-    void testThemeWithoutIndexTheme()
-    {
+    void testThemeWithoutIndexTheme() {
         QStringList paths = {m_fixture.path()};
-        auto result = XdgLookup::lookupIcon("noindex-icon", 48, 1,
-                                            paths, {"noindex"});
+        auto result = XdgLookup::lookupIcon("noindex-icon", 48, 1, paths, {"noindex"});
         QVERIFY(result.found);
         QVERIFY(result.path.contains("noindex-icon.png"));
     }
 
-    void testBaseWithoutIndexThemeKewCase()
-    {
+    void testBaseWithoutIndexThemeKewCase() {
         // kew case: BASE/hicolor/512x512/apps/kew.png exists
         // but BASE/ has no index.theme — should still walk hicolor subtree
         QStringList paths = {m_fixture.path()};
-        auto result = XdgLookup::lookupIcon("kew", 512, 1,
-                                            paths, {"basenoindex", "hicolor"});
+        auto result = XdgLookup::lookupIcon("kew", 512, 1, paths, {"basenoindex", "hicolor"});
         Q_UNUSED(result);
         // This test verifies the structure exists; actual lookup requires
         // the chain to include the right themes.
-        QVERIFY(QFileInfo::exists(m_fixture.path()
-                + "/basenoindex/hicolor/512x512/apps/kew.png"));
+        QVERIFY(QFileInfo::exists(m_fixture.path() + "/basenoindex/hicolor/512x512/apps/kew.png"));
     }
 
-    void testFirstInChainPriority()
-    {
+    void testFirstInChainPriority() {
         // icon.png exists in both mytheme/48x48/apps/ and parent/32x32/apps/
         // For size 48, mytheme's exact 48 match should win
-        auto result48 = XdgLookup::lookupIcon("icon", 48, 1,
-                                              searchPaths(), themeChain());
+        auto result48 = XdgLookup::lookupIcon("icon", 48, 1, searchPaths(), themeChain());
         QVERIFY(result48.found);
         QVERIFY(result48.path.contains("mytheme"));
         QVERIFY(!result48.path.contains("parent"));
     }
 
-    void testSizeDistance()
-    {
-        XdgIconDir d1; d1.type = XdgIconType::Fixed; d1.size = 48; d1.scale = 1;
+    void testSizeDistance() {
+        XdgIconDir d1;
+        d1.type = XdgIconType::Fixed;
+        d1.size = 48;
+        d1.scale = 1;
         QCOMPARE(XdgLookup::sizeDistance(d1, 48, 1), 0);
         QCOMPARE(XdgLookup::sizeDistance(d1, 64, 1), 16);
 
-        XdgIconDir d2; d2.type = XdgIconType::Scalable; d2.scale = 1;
+        XdgIconDir d2;
+        d2.type = XdgIconType::Scalable;
+        d2.scale = 1;
         QCOMPARE(XdgLookup::sizeDistance(d2, 128, 1), 0);
 
-        XdgIconDir d3; d3.type = XdgIconType::Threshold; d3.size = 48;
-        d3.threshold = 2; d3.scale = 1;
+        XdgIconDir d3;
+        d3.type = XdgIconType::Threshold;
+        d3.size = 48;
+        d3.threshold = 2;
+        d3.scale = 1;
         QCOMPARE(XdgLookup::sizeDistance(d3, 48, 1), 0);
         QCOMPARE(XdgLookup::sizeDistance(d3, 64, 1), 16);
     }
 
-    void testXdgIconPaths()
-    {
+    void testXdgIconPaths() {
         QStringList paths = XdgLookup::xdgIconPaths();
         QVERIFY(paths.size() > 0);
         QVERIFY(!paths.contains(QString()));
     }
 
-    void testEmptyName()
-    {
-        auto result = XdgLookup::lookupIcon("", 48, 1,
-                                            searchPaths(), themeChain());
+    void testEmptyName() {
+        auto result = XdgLookup::lookupIcon("", 48, 1, searchPaths(), themeChain());
         QVERIFY(!result.found);
         QVERIFY(result.path.isEmpty());
     }

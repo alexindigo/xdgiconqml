@@ -8,26 +8,23 @@
 #include "xdgicontheme.h"
 #include "xdgindexparse.h"
 
-class TestXdgIconTheme : public QObject
-{
+class TestXdgIconTheme : public QObject {
     Q_OBJECT
 
     QTemporaryDir m_fixture;
 
-    void setupFixture()
-    {
+    void setupFixture() {
         QDir root(m_fixture.path());
 
         root.mkpath("mytheme");
         {
             QFile f(root.filePath("mytheme/index.theme"));
             QVERIFY(f.open(QIODevice::WriteOnly));
-            QTextStream(&f)
-                << "[Icon Theme]\n"
-                << "Inherits=parent\n"
-                << "Directories=48x48/apps\n"
-                << "\n"
-                << "[48x48/apps]\nSize=48\nType=Fixed\n";
+            QTextStream(&f) << "[Icon Theme]\n"
+                            << "Inherits=parent\n"
+                            << "Directories=48x48/apps\n"
+                            << "\n"
+                            << "[48x48/apps]\nSize=48\nType=Fixed\n";
             f.close();
         }
 
@@ -35,11 +32,10 @@ class TestXdgIconTheme : public QObject
         {
             QFile f(root.filePath("parent/index.theme"));
             QVERIFY(f.open(QIODevice::WriteOnly));
-            QTextStream(&f)
-                << "[Icon Theme]\n"
-                << "Directories=32x32/apps\n"
-                << "\n"
-                << "[32x32/apps]\nSize=32\n";
+            QTextStream(&f) << "[Icon Theme]\n"
+                            << "Directories=32x32/apps\n"
+                            << "\n"
+                            << "[32x32/apps]\nSize=32\n";
             f.close();
         }
 
@@ -55,8 +51,7 @@ class TestXdgIconTheme : public QObject
 private slots:
     void initTestCase() { setupFixture(); }
 
-    void testThemeChainResolution()
-    {
+    void testThemeChainResolution() {
         QTemporaryDir fixtures;
         QDir root(fixtures.path());
         root.mkpath("themeA");
@@ -85,8 +80,7 @@ private slots:
         QVERIFY(p2.inherits.isEmpty());
     }
 
-    void testSetCurrentTheme()
-    {
+    void testSetCurrentTheme() {
         XdgIconTheme *prev = XdgIconTheme::instance();
         delete prev;
 
@@ -104,8 +98,7 @@ private slots:
         QCOMPARE(spy.count(), 1);
     }
 
-    void testAvailableThemesWithFixture()
-    {
+    void testAvailableThemesWithFixture() {
         XdgIconTheme *prev = XdgIconTheme::instance();
         delete prev;
 
@@ -114,8 +107,7 @@ private slots:
         QVERIFY(themes.contains("hicolor"));
     }
 
-    void testRescanEmitsSignals()
-    {
+    void testRescanEmitsSignals() {
         XdgIconTheme *prev = XdgIconTheme::instance();
         delete prev;
 
@@ -128,14 +120,13 @@ private slots:
         QVERIFY(spyPaths.count() >= 1);
     }
 
-    void testSingletonInstance()
-    {
+    void testSingletonInstance() {
         XdgIconTheme *prev = XdgIconTheme::instance();
         delete prev;
 
         XdgIconTheme *a = XdgIconTheme::instance();
         XdgIconTheme *b = XdgIconTheme::instance();
-        QCOMPARE(a, b);       // same instance returned
+        QCOMPARE(a, b); // same instance returned
 
         bool deleted = false;
         connect(a, &QObject::destroyed, [&]() { deleted = true; });
@@ -144,12 +135,11 @@ private slots:
 
         XdgIconTheme *c = XdgIconTheme::instance();
         QVERIFY(c != nullptr);
-        QVERIFY(deleted);     // previous instance was destroyed
+        QVERIFY(deleted); // previous instance was destroyed
         delete c;
     }
 
-    void testDefaultThemeIsHicolor()
-    {
+    void testDefaultThemeIsHicolor() {
         XdgIconTheme *prev = XdgIconTheme::instance();
         delete prev;
 
@@ -163,8 +153,7 @@ private slots:
         QVERIFY(chain.contains("hicolor"));
     }
 
-    void testSearchPaths()
-    {
+    void testSearchPaths() {
         XdgIconTheme *prev = XdgIconTheme::instance();
         delete prev;
 
@@ -175,8 +164,7 @@ private slots:
             QVERIFY(p.contains("icons") || p.contains("pixmaps"));
     }
 
-    void testDbusBroadcastEnabled()
-    {
+    void testDbusBroadcastEnabled() {
         XdgIconTheme *prev = XdgIconTheme::instance();
         delete prev;
 

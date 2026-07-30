@@ -3,13 +3,11 @@
 
 #include "xdgcache.h"
 
-class TestXdgCache : public QObject
-{
+class TestXdgCache : public QObject {
     Q_OBJECT
 
 private slots:
-    void testMakeKey()
-    {
+    void testMakeKey() {
         QString key = XdgCache::makeKey("firefox", 48, 1, "hicolor");
         QVERIFY(key.contains("firefox"));
         QVERIFY(key.contains("48"));
@@ -25,8 +23,7 @@ private slots:
         QVERIFY(key != key4);
     }
 
-    void testInsertAndLookup()
-    {
+    void testInsertAndLookup() {
         XdgCache cache;
         QCOMPARE(cache.count(), 0);
 
@@ -48,10 +45,10 @@ private slots:
         QVERIFY(missing.path.isEmpty());
     }
 
-    void testRemove()
-    {
+    void testRemove() {
         XdgCache cache;
-        XdgCacheEntry entry; entry.path = "/test.png";
+        XdgCacheEntry entry;
+        entry.path = "/test.png";
 
         QString key = XdgCache::makeKey("test", 32, 1, "hicolor");
         cache.insert(key, entry);
@@ -62,11 +59,11 @@ private slots:
         QVERIFY(!cache.contains(key));
     }
 
-    void testClear()
-    {
+    void testClear() {
         XdgCache cache;
         for (int i = 0; i < 10; ++i) {
-            XdgCacheEntry e; e.path = QString("/icon%1.png").arg(i);
+            XdgCacheEntry e;
+            e.path = QString("/icon%1.png").arg(i);
             cache.insert(XdgCache::makeKey(QString("icon%1").arg(i), 32, 1, "h"), e);
         }
         QCOMPARE(cache.count(), 10);
@@ -75,10 +72,10 @@ private slots:
         QCOMPARE(cache.count(), 0);
     }
 
-    void testInvalidateAll()
-    {
+    void testInvalidateAll() {
         XdgCache cache;
-        XdgCacheEntry e; e.path = "/test.png";
+        XdgCacheEntry e;
+        e.path = "/test.png";
         cache.insert(XdgCache::makeKey("a", 32, 1, "h"), e);
         cache.insert(XdgCache::makeKey("b", 32, 1, "h"), e);
 
@@ -88,10 +85,10 @@ private slots:
         QCOMPARE(spy.count(), 1);
     }
 
-    void testInvalidateByName()
-    {
+    void testInvalidateByName() {
         XdgCache cache;
-        XdgCacheEntry e; e.path = "/test.png";
+        XdgCacheEntry e;
+        e.path = "/test.png";
         cache.insert(XdgCache::makeKey("firefox", 32, 1, "h"), e);
         cache.insert(XdgCache::makeKey("firefox", 48, 1, "h"), e);
         cache.insert(XdgCache::makeKey("thunderbird", 32, 1, "h"), e);
@@ -102,10 +99,10 @@ private slots:
         QVERIFY(!cache.contains(XdgCache::makeKey("firefox", 32, 1, "h")));
     }
 
-    void testInvalidateByTheme()
-    {
+    void testInvalidateByTheme() {
         XdgCache cache;
-        XdgCacheEntry e; e.path = "/test.png";
+        XdgCacheEntry e;
+        e.path = "/test.png";
         cache.insert(XdgCache::makeKey("firefox", 32, 1, "Adwaita"), e);
         cache.insert(XdgCache::makeKey("firefox", 32, 1, "hicolor"), e);
         cache.insert(XdgCache::makeKey("firefox", 48, 1, "hicolor"), e);
@@ -116,12 +113,12 @@ private slots:
         QVERIFY(!cache.contains(XdgCache::makeKey("firefox", 32, 1, "hicolor")));
     }
 
-    void testMaxEntries()
-    {
+    void testMaxEntries() {
         XdgCache cache;
         cache.setMaxEntries(3);
 
-        XdgCacheEntry e; e.path = "/test.png";
+        XdgCacheEntry e;
+        e.path = "/test.png";
         cache.insert(XdgCache::makeKey("a", 32, 1, "h"), e);
         QTest::qSleep(1);
         cache.insert(XdgCache::makeKey("b", 32, 1, "h"), e);
@@ -134,10 +131,10 @@ private slots:
         QVERIFY(!cache.contains(XdgCache::makeKey("a", 32, 1, "h")));
     }
 
-    void testSignals()
-    {
+    void testSignals() {
         XdgCache cache;
-        XdgCacheEntry e; e.path = "/test.png";
+        XdgCacheEntry e;
+        e.path = "/test.png";
 
         QSignalSpy spyCount(&cache, &XdgCache::countChanged);
         cache.insert(XdgCache::makeKey("a", 32, 1, "h"), e);
@@ -147,8 +144,7 @@ private slots:
         QCOMPARE(spyCount.count(), 2);
     }
 
-    void testMaxEntriesProperty()
-    {
+    void testMaxEntriesProperty() {
         XdgCache cache;
         QCOMPARE(cache.maxEntries(), 500);
 

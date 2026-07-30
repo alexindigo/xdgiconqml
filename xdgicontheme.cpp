@@ -14,9 +14,7 @@
 
 XdgIconTheme *XdgIconTheme::s_instance = nullptr;
 
-XdgIconTheme::XdgIconTheme(QObject *parent)
-    : QObject(parent)
-{
+XdgIconTheme::XdgIconTheme(QObject *parent) : QObject(parent) {
     if (!s_instance)
         s_instance = this;
 
@@ -29,14 +27,12 @@ XdgIconTheme::XdgIconTheme(QObject *parent)
     m_initialized = true;
 }
 
-XdgIconTheme::~XdgIconTheme()
-{
+XdgIconTheme::~XdgIconTheme() {
     if (s_instance == this)
         s_instance = nullptr;
 }
 
-XdgIconTheme *XdgIconTheme::instance()
-{
+XdgIconTheme *XdgIconTheme::instance() {
     if (!s_instance) {
         s_instance = new XdgIconTheme();
     } else if (!s_instance->m_initialized) {
@@ -49,10 +45,11 @@ XdgIconTheme *XdgIconTheme::instance()
     return s_instance;
 }
 
-QString XdgIconTheme::currentTheme() const { return m_currentTheme; }
+QString XdgIconTheme::currentTheme() const {
+    return m_currentTheme;
+}
 
-void XdgIconTheme::setCurrentTheme(const QString &theme)
-{
+void XdgIconTheme::setCurrentTheme(const QString &theme) {
     if (m_currentTheme == theme || theme.isEmpty())
         return;
     m_currentTheme = theme;
@@ -60,14 +57,19 @@ void XdgIconTheme::setCurrentTheme(const QString &theme)
     emit currentThemeChanged();
 }
 
-QStringList XdgIconTheme::availableThemes() const { return m_availableThemes; }
+QStringList XdgIconTheme::availableThemes() const {
+    return m_availableThemes;
+}
 
-QStringList XdgIconTheme::searchPaths() const { return m_searchPaths; }
+QStringList XdgIconTheme::searchPaths() const {
+    return m_searchPaths;
+}
 
-QStringList XdgIconTheme::themeChain() const { return m_themeChain; }
+QStringList XdgIconTheme::themeChain() const {
+    return m_themeChain;
+}
 
-void XdgIconTheme::rescan()
-{
+void XdgIconTheme::rescan() {
     buildSearchPaths();
     detectCurrentTheme();
     scanAvailableThemes();
@@ -80,15 +82,13 @@ void XdgIconTheme::rescan()
 
 // -- private --
 
-void XdgIconTheme::detectCurrentTheme()
-{
+void XdgIconTheme::detectCurrentTheme() {
     m_currentTheme = themeFromEnvOrConfig();
     if (m_currentTheme.isEmpty())
         m_currentTheme = QStringLiteral("hicolor");
 }
 
-void XdgIconTheme::scanAvailableThemes()
-{
+void XdgIconTheme::scanAvailableThemes() {
     m_availableThemes.clear();
     static const QString index = QStringLiteral("/index.theme");
 
@@ -99,8 +99,8 @@ void XdgIconTheme::scanAvailableThemes()
 
         const auto entries = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
         for (const QString &entry : entries) {
-            if (QFileInfo::exists(base + QLatin1Char('/') + entry + index)
-                && !m_availableThemes.contains(entry)) {
+            if (QFileInfo::exists(base + QLatin1Char('/') + entry + index) &&
+                !m_availableThemes.contains(entry)) {
                 m_availableThemes.append(entry);
             }
         }
@@ -109,13 +109,11 @@ void XdgIconTheme::scanAvailableThemes()
     m_availableThemes.sort(Qt::CaseInsensitive);
 }
 
-void XdgIconTheme::buildSearchPaths()
-{
+void XdgIconTheme::buildSearchPaths() {
     m_searchPaths = XdgLookup::xdgIconPaths();
 }
 
-void XdgIconTheme::resolveThemeChain()
-{
+void XdgIconTheme::resolveThemeChain() {
     m_themeChain.clear();
     if (m_currentTheme.isEmpty())
         return;
@@ -150,19 +148,18 @@ void XdgIconTheme::resolveThemeChain()
         m_themeChain.append(QStringLiteral("hicolor"));
 }
 
-QString XdgIconTheme::themeFromEnvOrConfig()
-{
+QString XdgIconTheme::themeFromEnvOrConfig() {
     const char *env = qgetenv("QS_ICON_THEME");
     if (env && env[0])
         return QString::fromUtf8(env);
 
-    QString gtkTheme = readGtkConfigTheme(
-        QDir::homePath() + QStringLiteral("/.config/gtk-3.0/settings.ini"));
+    QString gtkTheme =
+        readGtkConfigTheme(QDir::homePath() + QStringLiteral("/.config/gtk-3.0/settings.ini"));
     if (!gtkTheme.isEmpty())
         return gtkTheme;
 
-    gtkTheme = readGtkConfigTheme(
-        QDir::homePath() + QStringLiteral("/.config/gtk-4.0/settings.ini"));
+    gtkTheme =
+        readGtkConfigTheme(QDir::homePath() + QStringLiteral("/.config/gtk-4.0/settings.ini"));
     if (!gtkTheme.isEmpty())
         return gtkTheme;
 
@@ -173,8 +170,7 @@ QString XdgIconTheme::themeFromEnvOrConfig()
     return {};
 }
 
-QString XdgIconTheme::readGtkConfigTheme(const QString &configPath)
-{
+QString XdgIconTheme::readGtkConfigTheme(const QString &configPath) {
     QFile file(configPath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return {};
@@ -190,8 +186,7 @@ QString XdgIconTheme::readGtkConfigTheme(const QString &configPath)
     return {};
 }
 
-QString XdgIconTheme::readQt6CtTheme()
-{
+QString XdgIconTheme::readQt6CtTheme() {
     QString path = QDir::homePath() + QStringLiteral("/.config/qt6ct/qt6ct.conf");
     if (!QFileInfo::exists(path))
         return {};
@@ -203,12 +198,10 @@ QString XdgIconTheme::readQt6CtTheme()
     return theme;
 }
 
-void XdgIconTheme::setupWatchers()
-{
+void XdgIconTheme::setupWatchers() {
     m_pathWatcher = new XdgPathWatcher(this);
     m_pathWatcher->watchPaths(m_searchPaths);
-    connect(m_pathWatcher, &XdgPathWatcher::rescanTriggered,
-            this, &XdgIconTheme::rescan);
+    connect(m_pathWatcher, &XdgPathWatcher::rescanTriggered, this, &XdgIconTheme::rescan);
 
     m_themeWatcher = new XdgThemeWatcher(this);
     QString home = QDir::homePath();
@@ -216,28 +209,21 @@ void XdgIconTheme::setupWatchers()
     m_themeWatcher->watchThemeConfig(home + QStringLiteral("/.config/gtk-4.0/settings.ini"));
     m_themeWatcher->watchThemeConfig(home + QStringLiteral("/.config/qt6ct/qt6ct.conf"));
     m_themeWatcher->watchThemeConfig(home + QStringLiteral("/.config/kdeglobals"));
-    connect(m_themeWatcher, &XdgThemeWatcher::themeConfigChanged,
-            this, &XdgIconTheme::rescan);
+    connect(m_themeWatcher, &XdgThemeWatcher::themeConfigChanged, this, &XdgIconTheme::rescan);
 }
 
-void XdgIconTheme::setupBroadcast()
-{
+void XdgIconTheme::setupBroadcast() {
     m_broadcast = new XdgBroadcast(this);
-    connect(m_broadcast, &XdgBroadcast::themeChanged,
-            this, &XdgIconTheme::setCurrentTheme);
-    connect(m_broadcast, &XdgBroadcast::iconChanged,
-            this, [](const QString &name) {
-                XdgIcon::invalidateCacheForName(name);
-            });
+    connect(m_broadcast, &XdgBroadcast::themeChanged, this, &XdgIconTheme::setCurrentTheme);
+    connect(m_broadcast, &XdgBroadcast::iconChanged, this,
+            [](const QString &name) { XdgIcon::invalidateCacheForName(name); });
 }
 
-bool XdgIconTheme::dbusBroadcastEnabled() const
-{
+bool XdgIconTheme::dbusBroadcastEnabled() const {
     return m_dbusBroadcastEnabled;
 }
 
-void XdgIconTheme::setDbusBroadcastEnabled(bool enabled)
-{
+void XdgIconTheme::setDbusBroadcastEnabled(bool enabled) {
     if (m_dbusBroadcastEnabled == enabled)
         return;
     m_dbusBroadcastEnabled = enabled;

@@ -5,8 +5,7 @@
 #include "xdgindexparse.h"
 #include "xdglookup.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("xdgiconqml-lookup");
 

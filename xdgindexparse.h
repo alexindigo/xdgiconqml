@@ -7,8 +7,7 @@
 
 #include "xdgtypes.h"
 
-class XdgIndexParse
-{
+class XdgIndexParse {
 public:
     struct ThemeMeta {
         QString themeName;

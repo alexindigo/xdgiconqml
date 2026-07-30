@@ -5,8 +5,7 @@
 #include <QFileSystemWatcher>
 #include <QStringList>
 
-class XdgThemeWatcher : public QObject
-{
+class XdgThemeWatcher : public QObject {
     Q_OBJECT
 
 public:

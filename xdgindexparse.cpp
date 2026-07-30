@@ -7,8 +7,7 @@
 
 #include <algorithm>
 
-XdgIndexParse::ThemeMeta XdgIndexParse::parseIndexFile(const QString &themeRoot)
-{
+XdgIndexParse::ThemeMeta XdgIndexParse::parseIndexFile(const QString &themeRoot) {
     ThemeMeta meta;
 
     const QString indexPath = themeRoot + QStringLiteral("/index.theme");
@@ -48,7 +47,8 @@ XdgIndexParse::ThemeMeta XdgIndexParse::parseIndexFile(const QString &themeRoot)
 
     QTextStream in(&file);
     while (in.readLineInto(&line)) {
-        while (!line.isEmpty() && (line.endsWith(QLatin1Char('\r')) || line.endsWith(QLatin1Char(' '))))
+        while (!line.isEmpty() &&
+               (line.endsWith(QLatin1Char('\r')) || line.endsWith(QLatin1Char(' '))))
             line.chop(1);
 
         if (line.isEmpty() || line.startsWith(QLatin1Char('#')))
@@ -187,13 +187,11 @@ XdgIndexParse::ThemeMeta XdgIndexParse::parseIndexFile(const QString &themeRoot)
     return meta;
 }
 
-QVector<XdgIconDir> XdgIndexParse::fallbackIconDirs(const QString &themeRoot)
-{
+QVector<XdgIconDir> XdgIndexParse::fallbackIconDirs(const QString &themeRoot) {
     QVector<XdgIconDir> dirs;
     static const char *fallbacks[] = {
-        "scalable/apps", "scalable", "256x256/apps", "256x256",
-        "128x128/apps", "128x128", "64x64/apps", "64x64",
-        "48x48/apps",   "48x48",   "32x32/apps",   "32x32",
+        "scalable/apps", "scalable", "256x256/apps", "256x256", "128x128/apps", "128x128",
+        "64x64/apps",    "64x64",    "48x48/apps",   "48x48",   "32x32/apps",   "32x32",
     };
 
     for (const char *path : fallbacks) {
@@ -204,9 +202,8 @@ QVector<XdgIconDir> XdgIndexParse::fallbackIconDirs(const QString &themeRoot)
         XdgIconDir dir;
         dir.subdir = QString::fromLatin1(path);
         dir.size = sizeFromDirName(dir.subdir);
-        dir.type = (dir.subdir.contains(QStringLiteral("scalable")))
-                       ? XdgIconType::Scalable
-                       : XdgIconType::Threshold;
+        dir.type = (dir.subdir.contains(QStringLiteral("scalable"))) ? XdgIconType::Scalable
+                                                                     : XdgIconType::Threshold;
         dir.maxSize = dir.size;
         dir.minSize = dir.size;
         dir.threshold = 2;
@@ -217,8 +214,7 @@ QVector<XdgIconDir> XdgIndexParse::fallbackIconDirs(const QString &themeRoot)
     return dirs;
 }
 
-int XdgIndexParse::sizeFromDirName(const QString &dirName)
-{
+int XdgIndexParse::sizeFromDirName(const QString &dirName) {
     if (dirName.contains(QStringLiteral("scalable")))
         return 0;
 
@@ -235,8 +231,7 @@ int XdgIndexParse::sizeFromDirName(const QString &dirName)
     return num;
 }
 
-XdgIconType XdgIndexParse::parseType(const QString &typeStr)
-{
+XdgIconType XdgIndexParse::parseType(const QString &typeStr) {
     if (typeStr.compare(QLatin1String("Fixed"), Qt::CaseInsensitive) == 0)
         return XdgIconType::Fixed;
     if (typeStr.compare(QLatin1String("Scalable"), Qt::CaseInsensitive) == 0)
@@ -246,23 +241,22 @@ XdgIconType XdgIndexParse::parseType(const QString &typeStr)
     return XdgIconType::Threshold;
 }
 
-XdgIconContext XdgIndexParse::parseContext(const QString &contextStr)
-{
+XdgIconContext XdgIndexParse::parseContext(const QString &contextStr) {
     if (contextStr.isEmpty())
         return XdgIconContext::Unknown;
 
     static const QHash<QString, XdgIconContext> map = {
-        {QStringLiteral("Actions"),       XdgIconContext::Actions},
-        {QStringLiteral("Applications"),  XdgIconContext::Apps},
-        {QStringLiteral("Categories"),    XdgIconContext::Categories},
-        {QStringLiteral("Devices"),       XdgIconContext::Devices},
-        {QStringLiteral("Emblems"),       XdgIconContext::Emblems},
-        {QStringLiteral("Emotes"),        XdgIconContext::Emotes},
+        {QStringLiteral("Actions"), XdgIconContext::Actions},
+        {QStringLiteral("Applications"), XdgIconContext::Apps},
+        {QStringLiteral("Categories"), XdgIconContext::Categories},
+        {QStringLiteral("Devices"), XdgIconContext::Devices},
+        {QStringLiteral("Emblems"), XdgIconContext::Emblems},
+        {QStringLiteral("Emotes"), XdgIconContext::Emotes},
         {QStringLiteral("International"), XdgIconContext::International},
-        {QStringLiteral("MimeTypes"),     XdgIconContext::Mimetypes},
-        {QStringLiteral("Places"),        XdgIconContext::Places},
-        {QStringLiteral("Status"),        XdgIconContext::Status},
-        {QStringLiteral("Stock"),         XdgIconContext::Stock},
+        {QStringLiteral("MimeTypes"), XdgIconContext::Mimetypes},
+        {QStringLiteral("Places"), XdgIconContext::Places},
+        {QStringLiteral("Status"), XdgIconContext::Status},
+        {QStringLiteral("Stock"), XdgIconContext::Stock},
     };
 
     auto it = map.find(contextStr);
@@ -272,7 +266,6 @@ XdgIconContext XdgIndexParse::parseContext(const QString &contextStr)
     return XdgIconContext::Unknown;
 }
 
-bool XdgIndexParse::isDirectorySection(const QString &section, const QStringList &knownDirs)
-{
+bool XdgIndexParse::isDirectorySection(const QString &section, const QStringList &knownDirs) {
     return knownDirs.contains(section);
 }

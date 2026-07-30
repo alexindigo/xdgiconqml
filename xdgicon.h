@@ -9,14 +9,13 @@
 class XdgIconTheme;
 class XdgCache;
 
-class XdgIcon : public QObject
-{
+class XdgIcon : public QObject {
     Q_OBJECT
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(int size READ size WRITE setSize NOTIFY sizeChanged)
     Q_PROPERTY(int scale READ scale WRITE setScale NOTIFY scaleChanged)
-    Q_PROPERTY(QString themeOverride READ themeOverride WRITE setThemeOverride
-               NOTIFY themeOverrideChanged)
+    Q_PROPERTY(
+        QString themeOverride READ themeOverride WRITE setThemeOverride NOTIFY themeOverrideChanged)
     Q_PROPERTY(QUrl path READ path NOTIFY pathChanged)
     Q_PROPERTY(bool found READ found NOTIFY foundChanged)
     Q_PROPERTY(QString extension READ extension NOTIFY extensionChanged)

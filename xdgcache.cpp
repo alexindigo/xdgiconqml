@@ -2,23 +2,13 @@
 
 #include <QRegularExpression>
 
-XdgCache::XdgCache(QObject *parent)
-    : QObject(parent)
-{
+XdgCache::XdgCache(QObject *parent) : QObject(parent) {}
+
+QString XdgCache::makeKey(const QString &name, int size, int scale, const QString &theme) {
+    return QStringLiteral("%1\x1f%2\x1f%3\x1f%4").arg(name).arg(size).arg(scale).arg(theme);
 }
 
-QString XdgCache::makeKey(const QString &name, int size,
-                            int scale, const QString &theme)
-{
-    return QStringLiteral("%1\x1f%2\x1f%3\x1f%4")
-        .arg(name)
-        .arg(size)
-        .arg(scale)
-        .arg(theme);
-}
-
-void XdgCache::insert(const QString &key, const XdgCacheEntry &entry)
-{
+void XdgCache::insert(const QString &key, const XdgCacheEntry &entry) {
     bool isNew = !m_cache.contains(key);
     m_cache[key] = entry;
     m_cache[key].timestamp = QDateTime::currentDateTimeUtc();
@@ -29,41 +19,34 @@ void XdgCache::insert(const QString &key, const XdgCacheEntry &entry)
     }
 }
 
-XdgCacheEntry XdgCache::lookup(const QString &key) const
-{
+XdgCacheEntry XdgCache::lookup(const QString &key) const {
     return m_cache.value(key);
 }
 
-bool XdgCache::contains(const QString &key) const
-{
+bool XdgCache::contains(const QString &key) const {
     return m_cache.contains(key);
 }
 
-void XdgCache::remove(const QString &key)
-{
+void XdgCache::remove(const QString &key) {
     m_cache.remove(key);
     emit countChanged();
 }
 
-void XdgCache::clear()
-{
+void XdgCache::clear() {
     m_cache.clear();
     emit countChanged();
 }
 
-int XdgCache::count() const
-{
+int XdgCache::count() const {
     return m_cache.size();
 }
 
-void XdgCache::invalidate()
-{
+void XdgCache::invalidate() {
     clear();
     emit cacheCleared();
 }
 
-void XdgCache::invalidateTheme(const QString &theme)
-{
+void XdgCache::invalidateTheme(const QString &theme) {
     QString suffix = QStringLiteral("\x1f") + theme;
     QStringList toRemove;
     for (auto it = m_cache.begin(); it != m_cache.end(); ++it) {
@@ -77,8 +60,7 @@ void XdgCache::invalidateTheme(const QString &theme)
         emit countChanged();
 }
 
-void XdgCache::invalidateName(const QString &name)
-{
+void XdgCache::invalidateName(const QString &name) {
     QString prefix = name + QLatin1Char('\x1f');
     QStringList toRemove;
     for (auto it = m_cache.begin(); it != m_cache.end(); ++it) {
@@ -92,13 +74,11 @@ void XdgCache::invalidateName(const QString &name)
         emit countChanged();
 }
 
-int XdgCache::maxEntries() const
-{
+int XdgCache::maxEntries() const {
     return m_maxEntries;
 }
 
-void XdgCache::setMaxEntries(int max)
-{
+void XdgCache::setMaxEntries(int max) {
     if (m_maxEntries == max || max < 1)
         return;
     m_maxEntries = max;
@@ -106,8 +86,7 @@ void XdgCache::setMaxEntries(int max)
     evictIfNeeded();
 }
 
-void XdgCache::evictIfNeeded()
-{
+void XdgCache::evictIfNeeded() {
     if (m_cache.size() <= m_maxEntries)
         return;
 

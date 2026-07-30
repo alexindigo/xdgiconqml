@@ -7,8 +7,7 @@
 
 #include <algorithm>
 
-QStringList XdgLookup::xdgIconPaths()
-{
+QStringList XdgLookup::xdgIconPaths() {
     QStringList paths;
 
     auto pushUnique = [&](const QString &path) {
@@ -19,8 +18,8 @@ QStringList XdgLookup::xdgIconPaths()
     if (const char *home = qgetenv("HOME"); home && home[0])
         pushUnique(QString::fromUtf8(home) + QStringLiteral("/.local/share/icons"));
 
-    const QStringList dataDirs = QStandardPaths::standardLocations(
-        QStandardPaths::GenericDataLocation);
+    const QStringList dataDirs =
+        QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
 
     for (const QString &dir : dataDirs)
         pushUnique(dir + QStringLiteral("/icons"));
@@ -29,19 +28,16 @@ QStringList XdgLookup::xdgIconPaths()
     pushUnique(QStringLiteral("/var/lib/flatpak/exports/share/icons"));
 
     if (const char *home = qgetenv("HOME"); home && home[0]) {
-        pushUnique(QString::fromUtf8(home)
-                   + QStringLiteral("/.local/share/flatpak/exports/share/icons"));
+        pushUnique(QString::fromUtf8(home) +
+                   QStringLiteral("/.local/share/flatpak/exports/share/icons"));
     }
 
     return paths;
 }
 
-XdgLookup::Result XdgLookup::lookupIcon(const QString &iconName,
-                                          int size,
-                                          int scale,
-                                          const QStringList &searchPaths,
-                                          const QStringList &themeChain)
-{
+XdgLookup::Result XdgLookup::lookupIcon(const QString &iconName, int size, int scale,
+                                        const QStringList &searchPaths,
+                                        const QStringList &themeChain) {
     if (iconName.isEmpty())
         return {};
 
@@ -105,10 +101,7 @@ XdgLookup::Result XdgLookup::lookupIcon(const QString &iconName,
     return {};
 }
 
-bool XdgLookup::dirMatchesIcon(const XdgIconDir &dir,
-                                 int targetSize,
-                                 int targetScale)
-{
+bool XdgLookup::dirMatchesIcon(const XdgIconDir &dir, int targetSize, int targetScale) {
     if (dir.scale != targetScale)
         return false;
 
@@ -124,10 +117,7 @@ bool XdgLookup::dirMatchesIcon(const XdgIconDir &dir,
     }
 }
 
-int XdgLookup::sizeDistance(const XdgIconDir &dir,
-                              int targetSize,
-                              int targetScale)
-{
+int XdgLookup::sizeDistance(const XdgIconDir &dir, int targetSize, int targetScale) {
     if (dir.scale != targetScale)
         return std::numeric_limits<int>::max();
 
@@ -145,8 +135,7 @@ int XdgLookup::sizeDistance(const XdgIconDir &dir,
 
 // -- private --
 
-QStringList XdgLookup::iconExtensions()
-{
+QStringList XdgLookup::iconExtensions() {
     static const QStringList exts = {
         QStringLiteral(".svg"),
         QStringLiteral(".svgz"),
@@ -156,11 +145,8 @@ QStringList XdgLookup::iconExtensions()
     return exts;
 }
 
-XdgLookup::Result XdgLookup::findInTheme(const QString &themeRoot,
-                                             const QString &iconName,
-                                             int size,
-                                             int scale)
-{
+XdgLookup::Result XdgLookup::findInTheme(const QString &themeRoot, const QString &iconName,
+                                         int size, int scale) {
     auto meta = XdgIndexParse::parseIndexFile(themeRoot);
     QVector<XdgIconDir> dirs = meta.iconDirs;
 
@@ -174,8 +160,8 @@ XdgLookup::Result XdgLookup::findInTheme(const QString &themeRoot,
             continue;
 
         for (const QString &ext : exts) {
-            QString path = themeRoot + QLatin1Char('/') + dir.subdir
-                         + QLatin1Char('/') + iconName + ext;
+            QString path =
+                themeRoot + QLatin1Char('/') + dir.subdir + QLatin1Char('/') + iconName + ext;
             if (QFileInfo::exists(path))
                 return {path, true};
         }
@@ -184,11 +170,8 @@ XdgLookup::Result XdgLookup::findInTheme(const QString &themeRoot,
     return {};
 }
 
-XdgLookup::Result XdgLookup::findAnySizeInTheme(const QString &themeRoot,
-                                                     const QString &iconName,
-                                                     int size,
-                                                     int scale)
-{
+XdgLookup::Result XdgLookup::findAnySizeInTheme(const QString &themeRoot, const QString &iconName,
+                                                int size, int scale) {
     auto meta = XdgIndexParse::parseIndexFile(themeRoot);
     QVector<XdgIconDir> dirs = meta.iconDirs;
 
@@ -199,8 +182,8 @@ XdgLookup::Result XdgLookup::findAnySizeInTheme(const QString &themeRoot,
 
     for (const auto &dir : dirs) {
         for (const QString &ext : exts) {
-            QString path = themeRoot + QLatin1Char('/') + dir.subdir
-                         + QLatin1Char('/') + iconName + ext;
+            QString path =
+                themeRoot + QLatin1Char('/') + dir.subdir + QLatin1Char('/') + iconName + ext;
             if (QFileInfo::exists(path))
                 return {path, true};
         }
@@ -209,9 +192,7 @@ XdgLookup::Result XdgLookup::findAnySizeInTheme(const QString &themeRoot,
     return {};
 }
 
-QString XdgLookup::findLooseIcon(const QString &iconName,
-                                       const QStringList &searchPaths)
-{
+QString XdgLookup::findLooseIcon(const QString &iconName, const QStringList &searchPaths) {
     static const QStringList exts = iconExtensions();
 
     for (const QString &base : searchPaths) {

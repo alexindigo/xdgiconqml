@@ -10,15 +10,14 @@ class XdgCache;
 class XdgPathWatcher;
 class XdgThemeWatcher;
 
-class XdgIconTheme : public QObject
-{
+class XdgIconTheme : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QString currentTheme READ currentTheme WRITE setCurrentTheme
-               NOTIFY currentThemeChanged)
+    Q_PROPERTY(
+        QString currentTheme READ currentTheme WRITE setCurrentTheme NOTIFY currentThemeChanged)
     Q_PROPERTY(QStringList availableThemes READ availableThemes NOTIFY availableThemesChanged)
     Q_PROPERTY(QStringList searchPaths READ searchPaths NOTIFY searchPathsChanged)
     Q_PROPERTY(bool dbusBroadcastEnabled READ dbusBroadcastEnabled WRITE setDbusBroadcastEnabled
-               NOTIFY dbusBroadcastEnabledChanged)
+                   NOTIFY dbusBroadcastEnabledChanged)
     QML_ELEMENT
     QML_SINGLETON
 

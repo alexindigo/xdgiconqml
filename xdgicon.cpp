@@ -9,15 +9,13 @@
 
 static XdgCache s_cache;
 
-XdgIcon::XdgIcon(QObject *parent)
-    : QObject(parent)
-{
+XdgIcon::XdgIcon(QObject *parent) : QObject(parent) {}
+
+QString XdgIcon::name() const {
+    return m_name;
 }
 
-QString XdgIcon::name() const { return m_name; }
-
-void XdgIcon::setName(const QString &name)
-{
+void XdgIcon::setName(const QString &name) {
     if (m_name == name)
         return;
     m_name = name;
@@ -25,10 +23,11 @@ void XdgIcon::setName(const QString &name)
     resolve();
 }
 
-int XdgIcon::size() const { return m_size; }
+int XdgIcon::size() const {
+    return m_size;
+}
 
-void XdgIcon::setSize(int size)
-{
+void XdgIcon::setSize(int size) {
     if (m_size == size || size < 1)
         return;
     m_size = size;
@@ -36,10 +35,11 @@ void XdgIcon::setSize(int size)
     resolve();
 }
 
-int XdgIcon::scale() const { return m_scale; }
+int XdgIcon::scale() const {
+    return m_scale;
+}
 
-void XdgIcon::setScale(int scale)
-{
+void XdgIcon::setScale(int scale) {
     if (m_scale == scale || scale < 1)
         return;
     m_scale = scale;
@@ -47,10 +47,11 @@ void XdgIcon::setScale(int scale)
     resolve();
 }
 
-QString XdgIcon::themeOverride() const { return m_themeOverride; }
+QString XdgIcon::themeOverride() const {
+    return m_themeOverride;
+}
 
-void XdgIcon::setThemeOverride(const QString &theme)
-{
+void XdgIcon::setThemeOverride(const QString &theme) {
     if (m_themeOverride == theme)
         return;
     m_themeOverride = theme;
@@ -58,18 +59,24 @@ void XdgIcon::setThemeOverride(const QString &theme)
     resolve();
 }
 
-QUrl XdgIcon::path() const { return m_path; }
-bool XdgIcon::found() const { return m_found; }
-QString XdgIcon::extension() const { return m_extension; }
-bool XdgIcon::isSymbolic() const { return m_isSymbolic; }
+QUrl XdgIcon::path() const {
+    return m_path;
+}
+bool XdgIcon::found() const {
+    return m_found;
+}
+QString XdgIcon::extension() const {
+    return m_extension;
+}
+bool XdgIcon::isSymbolic() const {
+    return m_isSymbolic;
+}
 
-void XdgIcon::reload(bool force)
-{
+void XdgIcon::reload(bool force) {
     resolve(force);
 }
 
-void XdgIcon::resolve(bool force)
-{
+void XdgIcon::resolve(bool force) {
     bool wasSymbolic = m_isSymbolic;
     m_isSymbolic = m_name.endsWith(QStringLiteral("-symbolic"));
     bool symbolicChanged = (wasSymbolic != m_isSymbolic);
@@ -94,8 +101,7 @@ void XdgIcon::resolve(bool force)
     QStringList themes = effectiveThemeChain(m_themeOverride);
     QStringList paths = effectiveSearchPaths();
 
-    QString key = XdgCache::makeKey(m_name, m_size, m_scale,
-                                     themes.join(QLatin1Char(',')));
+    QString key = XdgCache::makeKey(m_name, m_size, m_scale, themes.join(QLatin1Char(',')));
 
     if (!force) {
         XdgCacheEntry cached = s_cache.lookup(key);
@@ -163,8 +169,7 @@ void XdgIcon::resolve(bool force)
     }
 }
 
-QStringList XdgIcon::effectiveSearchPaths()
-{
+QStringList XdgIcon::effectiveSearchPaths() {
     XdgIconTheme *theme = XdgIconTheme::instance();
     if (theme) {
         QStringList paths = theme->searchPaths();
@@ -174,8 +179,7 @@ QStringList XdgIcon::effectiveSearchPaths()
     return XdgLookup::xdgIconPaths();
 }
 
-QStringList XdgIcon::effectiveThemeChain(const QString &themeOverride)
-{
+QStringList XdgIcon::effectiveThemeChain(const QString &themeOverride) {
     XdgIconTheme *theme = XdgIconTheme::instance();
 
     if (!themeOverride.isEmpty()) {
@@ -183,8 +187,7 @@ QStringList XdgIcon::effectiveThemeChain(const QString &themeOverride)
         chain.append(themeOverride);
         if (theme) {
             for (const QString &base : theme->searchPaths()) {
-                auto meta = XdgIndexParse::parseIndexFile(
-                    base + QLatin1Char('/') + themeOverride);
+                auto meta = XdgIndexParse::parseIndexFile(base + QLatin1Char('/') + themeOverride);
                 if (!meta.themeName.isEmpty()) {
                     for (const QString &parent : meta.inherits)
                         chain.append(parent);
@@ -205,7 +208,6 @@ QStringList XdgIcon::effectiveThemeChain(const QString &themeOverride)
     return {QStringLiteral("hicolor")};
 }
 
-void XdgIcon::invalidateCacheForName(const QString &name)
-{
+void XdgIcon::invalidateCacheForName(const QString &name) {
     s_cache.invalidateName(name);
 }

@@ -8,8 +8,7 @@
 #include <QStringList>
 #include <QTimer>
 
-class XdgPathWatcher : public QObject
-{
+class XdgPathWatcher : public QObject {
     Q_OBJECT
 
 public:

@@ -6,15 +6,13 @@
 #include "xdgindexparse.h"
 #include "xdgtypes.h"
 
-class TestXdgIndexParse : public QObject
-{
+class TestXdgIndexParse : public QObject {
     Q_OBJECT
 
 private slots:
     void initTestCase() {}
 
-    void testSizeFromDirName()
-    {
+    void testSizeFromDirName() {
         QCOMPARE(XdgIndexParse::sizeFromDirName("48x48/apps"), 48);
         QCOMPARE(XdgIndexParse::sizeFromDirName("scalable/apps"), 0);
         QCOMPARE(XdgIndexParse::sizeFromDirName("256x256"), 256);
@@ -22,8 +20,7 @@ private slots:
         QCOMPARE(XdgIndexParse::sizeFromDirName("hello"), 0);
     }
 
-    void testParseType()
-    {
+    void testParseType() {
         auto meta = XdgIndexParse::parseIndexFile(QString());
 
         QVERIFY(meta.themeName.isEmpty());
@@ -31,8 +28,7 @@ private slots:
         QVERIFY(meta.iconDirs.isEmpty());
     }
 
-    void testParseFullIndexTheme()
-    {
+    void testParseFullIndexTheme() {
         QTemporaryDir tempDir;
         QVERIFY(tempDir.isValid());
 
@@ -112,8 +108,7 @@ private slots:
         QCOMPARE(scale2Count, 1);
     }
 
-    void testParseIndexThemeSortOrder()
-    {
+    void testParseIndexThemeSortOrder() {
         QTemporaryDir tempDir;
         QVERIFY(tempDir.isValid());
         QDir(tempDir.path()).mkdir("test-sort");
@@ -143,8 +138,7 @@ private slots:
         QCOMPARE(meta.iconDirs[3].subdir, QString("32x32/apps"));
     }
 
-    void testParseInheritsOnly()
-    {
+    void testParseInheritsOnly() {
         QTemporaryDir tempDir;
         QVERIFY(tempDir.isValid());
         QDir(tempDir.path()).mkdir("inherits-only");
@@ -162,16 +156,14 @@ private slots:
         QCOMPARE(meta.iconDirs.size(), 0);
     }
 
-    void testParseMissingIndexTheme()
-    {
+    void testParseMissingIndexTheme() {
         auto meta = XdgIndexParse::parseIndexFile("/nonexistent/path");
         QVERIFY(meta.themeName.isEmpty());
         QVERIFY(meta.iconDirs.isEmpty());
         QVERIFY(meta.inherits.isEmpty());
     }
 
-    void testParseThemeWithoutIconThemeSection()
-    {
+    void testParseThemeWithoutIconThemeSection() {
         QTemporaryDir tempDir;
         QVERIFY(tempDir.isValid());
         QDir(tempDir.path()).mkdir("no-section");
@@ -188,8 +180,7 @@ private slots:
         QVERIFY(meta.iconDirs.isEmpty());
     }
 
-    void testParseHiddenTheme()
-    {
+    void testParseHiddenTheme() {
         QTemporaryDir tempDir;
         QVERIFY(tempDir.isValid());
         QDir(tempDir.path()).mkdir("hidden-theme");
@@ -205,8 +196,7 @@ private slots:
         QVERIFY(meta.hidden);
     }
 
-    void testSizeInferredFromDirName()
-    {
+    void testSizeInferredFromDirName() {
         QTemporaryDir tempDir;
         QVERIFY(tempDir.isValid());
         QDir(tempDir.path()).mkdir("inferred");
@@ -228,8 +218,7 @@ private slots:
         QCOMPARE(meta.iconDirs[0].type, XdgIconType::Fixed);
     }
 
-    void testParseContextAllValues()
-    {
+    void testParseContextAllValues() {
         QVERIFY(true); // parseContext is tested via testParseFullIndexTheme
 
         QTemporaryDir tempDir;
@@ -262,8 +251,7 @@ private slots:
         }
     }
 
-    void testHandlesCommentsAndWhitespace()
-    {
+    void testHandlesCommentsAndWhitespace() {
         QTemporaryDir tempDir;
         QVERIFY(tempDir.isValid());
         QDir(tempDir.path()).mkdir("whitespace");
