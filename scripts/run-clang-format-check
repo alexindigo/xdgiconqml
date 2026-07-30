@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# scripts/run-clang-format-check — dry-run clang-format over all C++
+# sources; exits non-zero if any file would be reformatted.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+cd "$PROJECT_DIR"
+
+files=(*.cpp *.h tests/*.cpp tools/*.cpp)
+exec clang-format --dry-run --Werror "${files[@]}"

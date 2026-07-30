@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# pre-commit: enforce clang-format on all C++ sources before committing.
+
+set -euo pipefail
+
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="$(dirname "$(dirname "$HOOK_DIR")")"
+CHECK_SCRIPT="${REPO_DIR}/scripts/run-clang-format-check"
+
+if [[ ! -x "$CHECK_SCRIPT" ]]; then
+    echo "pre-commit: clang-format check script not found, skipping." >&2
+    exit 0
+fi
+
+# Capture output + exit code without triggering 'set -e' on the command
+# substitution (a failing command inside $(...) would kill the script).
+set +e
+OUTPUT=$("$CHECK_SCRIPT" 2>&1)
+CHECK_EXIT=$?
+set -e
+
+if [[ $CHECK_EXIT -ne 0 ]]; then
+    echo "" >&2
+    echo "  ---------------------------------------------------------------" >&2
+    echo "  clang-format check failed (exit $CHECK_EXIT)." >&2
+    echo "" >&2
+    echo "$OUTPUT" | head -20 >&2
+    echo "  ..." >&2
+    echo "" >&2
+    echo "  Run this to fix:" >&2
+    echo "    clang-format -i \\" >&2
+    echo "      ${REPO_DIR}/*.cpp ${REPO_DIR}/*.h \\" >&2
+    echo "      ${REPO_DIR}/tests/*.cpp ${REPO_DIR}/tools/*.cpp" >&2
+    echo "  ---------------------------------------------------------------" >&2
+    echo "" >&2
+    exit 1
+fi
