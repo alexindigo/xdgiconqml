@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# scripts/run-qmllint — invoke Qt6 qmllint against examples/
+#
+# The qmllint binary on PATH is often Qt5's v1.0, which silently ignores
+# .qmllint.ini and reports nothing. This script finds a Qt6 qmllint and
+# rejects anything older.
+#
+# --max-warnings 0 turns warnings into a non-zero exit code so this is
+# usable as a CI gate.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+pick_qmllint() {
+    local candidates=(
+        qmllint-qt6
+        qmllint6
+        /usr/lib/qt6/bin/qmllint
+        /usr/lib/qt/qt6/bin/qmllint
+    )
+
+    # Also consider whatever `qmllint` on PATH resolves to — some distros
+    # ship Qt6's binary under that name directly.
+    local on_path
+    on_path="$(command -v qmllint 2>/dev/null || true)"
+    [[ -n "$on_path" ]] && candidates+=("$on_path")
+
+    for cand in "${candidates[@]}"; do
+        if command -v "$cand" >/dev/null 2>&1 || [[ -x "$cand" ]]; then
+            local ver major
+            ver="$("$cand" --version 2>&1 | awk '{print $2}')"
+            major="${ver%%.*}"
+            if [[ "$major" =~ ^[0-9]+$ ]] && (( major >= 6 )); then
+                echo "$cand"
+                return 0
+            fi
+        fi
+    done
+    return 1
+}
+
+QMLLINT="$(pick_qmllint)" || {
+    echo "ERROR: No Qt6 qmllint found (need version >= 6.0)." >&2
+    echo "       The qmllint on PATH is likely Qt5's v1.0, which silently" >&2
+    echo "       ignores .qmllint.ini. Install qt6-declarative or similar." >&2
+    exit 2
+}
+
+BUILD_DIR="${PROJECT_DIR}/build-dev"
+[[ -d "$BUILD_DIR" ]] || {
+    echo "ERROR: build-dev/ not found. Run scripts/build-dev first." >&2
+    exit 2
+}
+
+exec "$QMLLINT" -I "$BUILD_DIR" --max-warnings 0 "${PROJECT_DIR}"/examples/*.qml
