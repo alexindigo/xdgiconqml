@@ -149,9 +149,8 @@ void XdgIconTheme::resolveThemeChain() {
 }
 
 QString XdgIconTheme::themeFromEnvOrConfig() {
-    const char *env = qgetenv("QS_ICON_THEME");
-    if (env && env[0])
-        return QString::fromUtf8(env);
+    if (!qEnvironmentVariableIsEmpty("QS_ICON_THEME"))
+        return qEnvironmentVariable("QS_ICON_THEME");
 
     QString gtkTheme =
         readGtkConfigTheme(QDir::homePath() + QStringLiteral("/.config/gtk-3.0/settings.ini"));

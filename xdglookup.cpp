@@ -15,8 +15,7 @@ QStringList XdgLookup::xdgIconPaths() {
             paths.append(path);
     };
 
-    if (const char *home = qgetenv("HOME"); home && home[0])
-        pushUnique(QString::fromUtf8(home) + QStringLiteral("/.local/share/icons"));
+    pushUnique(QDir::homePath() + QStringLiteral("/.local/share/icons"));
 
     const QStringList dataDirs =
         QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
@@ -27,10 +26,7 @@ QStringList XdgLookup::xdgIconPaths() {
     pushUnique(QStringLiteral("/run/current-system/sw/share/icons"));
     pushUnique(QStringLiteral("/var/lib/flatpak/exports/share/icons"));
 
-    if (const char *home = qgetenv("HOME"); home && home[0]) {
-        pushUnique(QString::fromUtf8(home) +
-                   QStringLiteral("/.local/share/flatpak/exports/share/icons"));
-    }
+    pushUnique(QDir::homePath() + QStringLiteral("/.local/share/flatpak/exports/share/icons"));
 
     return paths;
 }
