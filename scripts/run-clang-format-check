@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# scripts/run-clang-format-check — dry-run clang-format over all C++
-# sources; exits non-zero if any file would be reformatted.
+# scripts/run-clang-format-check — dry-run clang-format over all C++ sources.
+# Exits non-zero if any file would be reformatted.
+# GUARD: rejects non-C++ files to prevent YAML/JSON/XML from being mangled.
 
 set -euo pipefail
 
@@ -9,5 +10,22 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 cd "$PROJECT_DIR"
 
+# Glob expansion only matches files that exist. Validate they are .cpp or .h.
+shopt -s nullglob
 files=(*.cpp *.h tests/*.cpp tools/*.cpp)
+shopt -u nullglob
+
+for f in "${files[@]}"; do
+    [[ "$f" =~ \.(cpp|h)$ ]] || {
+        echo "ERROR: run-clang-format-check matched non-C++ file: $f" >&2
+        echo "       Update the file glob or move the file out of the project root." >&2
+        exit 2
+    }
+done
+
+if [[ ${#files[@]} -eq 0 ]]; then
+    echo "run-clang-format-check: no C++ files found, nothing to check." >&2
+    exit 0
+fi
+
 exec clang-format --dry-run --Werror "${files[@]}"

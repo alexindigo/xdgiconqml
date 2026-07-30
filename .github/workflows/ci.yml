@@ -9,6 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dbus: [on, off]
 
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +33,12 @@ jobs:
             qt6-base-dev-tools
 
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TEST_MODE=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_TEST_MODE=ON \
+            -DWITH_DBUS_BROADCAST=${{ matrix.dbus == 'on' && 'ON' || 'OFF' }} \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
       - name: Build
         run: cmake --build build --parallel "$(nproc)"
@@ -38,3 +47,13 @@ jobs:
         run: ctest --test-dir build --output-on-failure
         env:
           QT_QPA_PLATFORM: offscreen
+
+  clang-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+      - name: Run clang-format check
+        run: scripts/run-clang-format-check
+

@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# scripts/run-ci-local — run the same checks as CI before pushing.
+# Returns non-zero if any check fails. Usable as both a manual check
+# and as a pre-push hook.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+cd "$PROJECT_DIR"
+
+FAILURES=0
+
+banner()  { echo "==> $*"; }
+fail()    { echo "FAIL: $*" >&2; FAILURES=$((FAILURES + 1)); }
+pass()    { echo "PASS: $*"; }
+
+# --- clang-format ---
+banner "clang-format"
+if scripts/run-clang-format-check; then
+    pass "clang-format"
+else
+    fail "clang-format — run: clang-format -i *.cpp *.h tests/*.cpp tools/*.cpp"
+fi
+
+# --- qmllint ---
+banner "qmllint"
+if scripts/build-dev >/dev/null 2>&1 && scripts/run-qmllint; then
+    pass "qmllint"
+else
+    fail "qmllint"
+fi
+
+# --- tests ---
+banner "tests"
+if scripts/build-dev >/dev/null 2>&1 && scripts/run-tests >/dev/null 2>&1; then
+    pass "tests"
+else
+    fail "tests"
+fi
+
+# --- result ---
+echo ""
+if [[ $FAILURES -eq 0 ]]; then
+    echo "CI-local: all checks passed."
+    exit 0
+else
+    echo "CI-local: $FAILURES check(s) failed."
+    exit 1
+fi

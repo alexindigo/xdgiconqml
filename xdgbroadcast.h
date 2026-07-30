@@ -7,6 +7,7 @@
 #ifdef WITH_DBUS_BROADCAST
 #include <QDBusConnection>
 #include <QDBusMessage>
+#include <QDBusVariant>
 #include <QDateTime>
 #include <QHash>
 #endif
@@ -31,13 +32,13 @@ private:
     bool isDampened(const QString &name);
     void markBroadcasted(const QString &name);
 
-    Q_INVOKABLE void onSettingChanged(const QString &ns, const QString &key,
-                                      const QDBusVariant &value);
-    Q_INVOKABLE void onIconChanged(const QString &name);
-
-    QDBusConnection m_connection;
+    QDBusConnection m_connection = QDBusConnection::sessionBus();
     QHash<QString, QDateTime> m_recentBroadcasts;
     static constexpr int kDampenMs = 2000;
+
+private slots:
+    void onSettingChanged(const QString &ns, const QString &key, const QDBusVariant &value);
+    void onIconChanged(const QString &name);
 #endif
 };
 

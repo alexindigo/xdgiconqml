@@ -1,4 +1,5 @@
 #include "xdgbroadcast.h"
+#include "xdgresolver.h"
 
 XdgBroadcast::XdgBroadcast(QObject *parent) : QObject(parent) {}
 
@@ -66,7 +67,11 @@ void XdgBroadcast::onSettingChanged(const QString &ns, const QString &key,
 void XdgBroadcast::onIconChanged(const QString &name) {
     if (name.isEmpty())
         return;
+    if (isDampened(name))
+        return;
+    markBroadcasted(name);
     emit iconChanged(name);
+    XdgResolver::instance()->invalidateName(name);
 }
 
 bool XdgBroadcast::isDampened(const QString &name) {
