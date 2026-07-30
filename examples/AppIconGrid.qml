@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import XdgIcon 1.0
 
 Rectangle {
+    id: root
     width: 600
     height: 400
     color: "#1e1e2e"
@@ -20,15 +21,17 @@ Rectangle {
         rowSpacing: 20
 
         Repeater {
-            model: appIds
+            model: root.appIds
 
             Item {
+                id: cell
+                required property string modelData
                 width: 120
                 height: 140
 
                 XdgIcon {
                     id: appIcon
-                    name: modelData
+                    name: cell.modelData
                     size: 64
                 }
 
@@ -48,11 +51,10 @@ Rectangle {
                 }
 
                 Text {
-                    anchors.topMargin: 8
                     anchors.top: parent.top
                     anchors.topMargin: 88
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: modelData
+                    text: cell.modelData
                     color: appIcon.found ? "#cdd6f4" : "#6c7086"
                     font.pixelSize: 11
                     elide: Text.ElideRight

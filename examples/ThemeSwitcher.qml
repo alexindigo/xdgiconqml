@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Controls
 import XdgIcon 1.0
 
 Rectangle {
@@ -8,11 +7,11 @@ Rectangle {
     color: "#1e1e2e"
 
     Column {
-        anchors.centerIn: parent
+        anchors.top: parent.top
+        anchors.topMargin: 16
+        anchors.horizontalCenter: parent.horizontalCenter
         spacing: 16
         width: parent.width - 40
-        anchors.left: parent.left
-        anchors.leftMargin: 20
 
         Text {
             text: "Current theme: " + XdgIconTheme.currentTheme
@@ -34,23 +33,26 @@ Rectangle {
                 clip: true
 
                 delegate: Rectangle {
+                    id: row
+                    required property string modelData
+
                     width: ListView.view.width
                     height: 36
-                    color: modelData === XdgIconTheme.currentTheme ? "#45475a" : "transparent"
+                    color: row.modelData === XdgIconTheme.currentTheme ? "#45475a" : "transparent"
                     radius: 4
 
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left: parent.left
                         anchors.leftMargin: 12
-                        text: modelData
-                        color: modelData === XdgIconTheme.currentTheme ? "#a6e3a1" : "#cdd6f4"
+                        text: row.modelData
+                        color: row.modelData === XdgIconTheme.currentTheme ? "#a6e3a1" : "#cdd6f4"
                         font.pixelSize: 13
                     }
 
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: XdgIconTheme.currentTheme = modelData
+                        onClicked: XdgIconTheme.currentTheme = row.modelData
                     }
                 }
             }
