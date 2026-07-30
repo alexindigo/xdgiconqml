@@ -6,7 +6,6 @@
 #include <QtQml/qqmlregistration.h>
 
 class XdgBroadcast;
-class XdgCache;
 class XdgPathWatcher;
 class XdgThemeWatcher;
 
@@ -49,22 +48,9 @@ signals:
     void propertiesChanged();
 
 private:
-    void detectCurrentTheme();
-    void scanAvailableThemes();
-    void buildSearchPaths();
-    void resolveThemeChain();
     void setupWatchers();
     void setupBroadcast();
 
-    QString readGtkConfigTheme(const QString &configPath);
-    QString readQt6CtTheme();
-    QString themeFromEnvOrConfig();
-
-    QString m_currentTheme;
-    QStringList m_availableThemes;
-    QStringList m_searchPaths;
-    QStringList m_themeChain;
-    bool m_initialized = false;
     bool m_dbusBroadcastEnabled = false;
 
     XdgPathWatcher *m_pathWatcher = nullptr;
