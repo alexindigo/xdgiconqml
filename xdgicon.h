@@ -51,8 +51,8 @@ signals:
     void sizeChanged();
     void scaleChanged();
     void themeOverrideChanged();
-    void pathChanged();
-    void foundChanged();
+    void pathChanged(const QString &newPath);
+    void foundChanged(bool found);
     void extensionChanged();
     void isSymbolicChanged();
 

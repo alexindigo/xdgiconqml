@@ -2,9 +2,10 @@
 
 ## Prerequisites
 
-- Qt 6.8+
+- Qt 6.4+
 - CMake 3.16+
 - C++17 compiler
+- clang-format (for code style enforcement)
 
 ## Building
 
@@ -29,11 +30,11 @@ scripts/build-dev
 scripts/run-tests
 
 # Run specific test
-scripts/run-tests <test-name>
+scripts/run-tests -R <test-name>
 ```
 
 ## Code Style
 
-- `.clang-format` at project root — run before committing
-- `.qmllint.ini` for QML files
+- `scripts/run-clang-format-check` — verify formatting (pre-commit hook runs this)
+- `scripts/run-qmllint` — lint QML examples
 - Follow patterns in `dbusqml`, `mpvqml`, and `niriqml` for consistency

@@ -23,27 +23,31 @@ reactive theme updates.
 ### `XdgIcon`
 
 Per-instance icon lookup element. Automatically resolves an icon name to
-a file path based on the current theme and icon size.
+a file path based on the current theme and icon size. Re-resolves live
+when the theme changes or new icons appear on disk.
 
-**Properties:** `name`, `size`, `scale`, `themeOverride`, `path`, `found`
+**Properties:** `name`, `size`, `scale`, `themeOverride`, `path`, `found`,
+`extension`, `isSymbolic`
 
-**Methods:** `reload()`
+**Methods:** `reload(force = false)`
 
 ### `XdgIconTheme`
 
 Singleton providing theme management: current theme detection, available
-themes listing, and change notifications.
+themes listing, and change notifications. Access via attached properties
+(e.g. `XdgIconTheme.currentTheme`).
 
-**Properties:** `currentTheme`, `availableThemes`
+**Properties:** `currentTheme`, `availableThemes`, `searchPaths`,
+`dbusBroadcastEnabled`
 
 **Methods:** `rescan()`
 
 ## Internal Architecture
 
 ```
-XdgIcon ──→ XdgLookup ──→ XdgIndexParse
+XdgIcon ──→ XdgResolver (cache, theme chain, invalidation listeners)
               │
-              ├── XdgCache
+              ├── XdgLookup ──→ XdgIndexParse
               ├── XdgPathWatcher
               ├── XdgThemeWatcher
               └── XdgBroadcast (D-Bus, optional)
@@ -51,11 +55,13 @@ XdgIcon ──→ XdgLookup ──→ XdgIndexParse
 
 ## D-Bus Integration
 
-When built with `WITH_DBUS_BROADCAST=ON`, the plugin listens for theme
-changes via:
-- `org.freedesktop.portal.Settings` (XDG Desktop Portal)
-- `org.kde.GtkConfig` / GSettings (legacy)
+When built with `WITH_DBUS_BROADCAST=ON` and enabled at runtime via
+`XdgIconTheme.dbusBroadcastEnabled`, the plugin listens for theme
+changes via `org.freedesktop.portal.Settings` and participates in a
+cross-process `org.atmosphera.IconResolver.IconChanged` broadcast.
+Never a correctness dependency — filesystem watchers are the source
+of truth.
 
 ## License
 
-GPL-3.0
+GPL-3.0-or-later

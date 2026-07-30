@@ -25,12 +25,19 @@ XdgIcon {
     size: 48
 }
 
-XdgIconTheme {
-    id: theme
-    // currentTheme detected automatically
-    // availableThemes provides a list
-}
+// XdgIconTheme is a singleton — access via attached properties:
+Text { text: XdgIconTheme.currentTheme }
+// XdgIconTheme.availableThemes provides a list of installed themes
 ```
+
+## Features
+
+- Full XDG Icon Theme Specification v0.13 lookup
+- Reactive live invalidation via filesystem watchers
+- Lazy per-theme index caching
+- D-Bus broadcast support (optional, `WITH_DBUS_BROADCAST=ON`)
+- GTK-parity permissive behaviours (no-`index.theme` trees, loose-file fallback)
+- Debug CLI tool: `xdgiconqml-lookup`
 
 ## Building
 
@@ -47,9 +54,9 @@ scripts/run-tests
 
 ## Dependencies
 
-- Qt 6.8+ (Core, Qml, Quick)
-- Optionally Qt 6.8+ (DBus) — enabled with `-DWITH_DBUS_BROADCAST=ON`
+- Qt 6.4+ (Core, Qml, Quick)
+- Optionally Qt 6.4+ (DBus) — enabled with `-DWITH_DBUS_BROADCAST=ON`
 
 ## License
 
-GPL-3.0
+GPL-3.0-or-later

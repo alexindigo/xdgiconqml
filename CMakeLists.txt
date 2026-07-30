@@ -71,7 +71,7 @@ install(TARGETS xdgiconqml
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xdgiconqml
 )
 
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/XdgIcon/
@@ -157,6 +157,8 @@ endif()
 add_executable(xdgiconqml-lookup tools/xdgiconqml-lookup.cpp)
 target_include_directories(xdgiconqml-lookup PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(xdgiconqml-lookup PRIVATE Qt6::Core xdgiconqml)
+
+install(TARGETS xdgiconqml-lookup RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # ==================== COVERAGE ====================
 
