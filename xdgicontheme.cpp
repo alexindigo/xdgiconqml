@@ -62,7 +62,7 @@ void XdgIconTheme::rescan() {
 void XdgIconTheme::setupWatchers() {
     m_pathWatcher = new XdgPathWatcher(this);
     m_pathWatcher->watchPaths(XdgResolver::instance()->searchPaths());
-    connect(m_pathWatcher, &XdgPathWatcher::rescanTriggered, this, &XdgIconTheme::rescan);
+    connect(m_pathWatcher, &XdgPathWatcher::rescanTriggered, this, &XdgIconTheme::onWatcherFired);
 
     m_themeWatcher = new XdgThemeWatcher(this);
     QString home = QDir::homePath();
@@ -70,7 +70,17 @@ void XdgIconTheme::setupWatchers() {
     m_themeWatcher->watchThemeConfig(home + QStringLiteral("/.config/gtk-4.0/settings.ini"));
     m_themeWatcher->watchThemeConfig(home + QStringLiteral("/.config/qt6ct/qt6ct.conf"));
     m_themeWatcher->watchThemeConfig(home + QStringLiteral("/.config/kdeglobals"));
-    connect(m_themeWatcher, &XdgThemeWatcher::themeConfigChanged, this, &XdgIconTheme::rescan);
+    connect(m_themeWatcher, &XdgThemeWatcher::themeConfigChanged, this,
+            &XdgIconTheme::onWatcherFired);
+
+    m_debounceTimer = new QTimer(this);
+    m_debounceTimer->setSingleShot(true);
+    m_debounceTimer->setInterval(500);
+    connect(m_debounceTimer, &QTimer::timeout, this, &XdgIconTheme::rescan);
+}
+
+void XdgIconTheme::onWatcherFired() {
+    m_debounceTimer->start();
 }
 
 void XdgIconTheme::setupBroadcast() {

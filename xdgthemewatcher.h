@@ -1,8 +1,8 @@
 #ifndef XDGTHEMEWATCHER_H
 #define XDGTHEMEWATCHER_H
 
-#include <QObject>
 #include <QFileSystemWatcher>
+#include <QObject>
 #include <QStringList>
 
 class XdgThemeWatcher : public QObject {
@@ -19,6 +19,8 @@ signals:
     void themeDirChanged(const QString &path);
 
 private:
+    void onFileChanged(const QString &path);
+
     QFileSystemWatcher m_watcher;
 };
 

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QStringList>
+#include <QTimer>
 #include <QtQml/qqmlregistration.h>
 
 class XdgBroadcast;
@@ -50,8 +51,10 @@ signals:
 private:
     void setupWatchers();
     void setupBroadcast();
+    void onWatcherFired();
 
     bool m_dbusBroadcastEnabled = false;
+    QTimer *m_debounceTimer = nullptr;
 
     XdgPathWatcher *m_pathWatcher = nullptr;
     XdgThemeWatcher *m_themeWatcher = nullptr;
