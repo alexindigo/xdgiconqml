@@ -83,9 +83,9 @@ install(FILES
     xdgicontheme.h
     xdgindexparse.h
     xdglookup.h
+    xdgresolver.h
     xdgpathwatcher.h
     xdgthemewatcher.h
-    xdgcache.h
     xdgbroadcast.h
     xdgtypes.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xdgiconqml
