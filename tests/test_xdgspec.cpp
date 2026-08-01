@@ -29,6 +29,14 @@ private slots:
 
         QTest::newRow("scalable-cross-scale-match")
             << XdgIconType::Scalable << 96 << 1 << 256 << 1 << 48 << 2 << 0;
+
+        QTest::newRow("fixed-cross-scale-eff")
+            << XdgIconType::Fixed << 48 << 0 << 0 << 2 << 96 << 1 << 0;
+
+        QTest::newRow("threshold-within")
+            << XdgIconType::Threshold << 48 << 0 << 0 << 1 << 46 << 1 << 0;
+        QTest::newRow("threshold-outside-below")
+            << XdgIconType::Threshold << 48 << 0 << 0 << 1 << 44 << 1 << 2;
     }
 
     void sizeDistance() {
@@ -49,12 +57,6 @@ private slots:
         dir.scale = dirScale;
 
         const QString row = QString::fromLatin1(QTest::currentDataTag());
-        if (row == "scalable-below-min" || row == "scalable-above-max") {
-            QEXPECT_FAIL("", "Finding 3a — Scalable ignores minSize/maxSize", Continue);
-        }
-        if (row == "scalable-cross-scale-match") {
-            QEXPECT_FAIL("", "Finding 3b — sizeDistance rejects scale mismatch", Continue);
-        }
         QCOMPARE(XdgLookup::sizeDistance(dir, targetSize, targetScale), expected);
     }
 

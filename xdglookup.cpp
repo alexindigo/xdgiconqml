@@ -102,16 +102,30 @@ bool XdgLookup::dirMatchesIcon(const XdgIconDir &dir, int targetSize, int target
 }
 
 int XdgLookup::sizeDistance(const XdgIconDir &dir, int targetSize, int targetScale) {
-    if (dir.scale != targetScale)
-        return std::numeric_limits<int>::max();
+    const int effTarget = targetSize * targetScale;
+    const int effDir = dir.size * dir.scale;
 
     switch (dir.type) {
-    case XdgIconType::Scalable:
-        return 0;
     case XdgIconType::Fixed:
-        return std::abs(dir.size - targetSize);
-    case XdgIconType::Threshold:
-        return std::abs(dir.size - targetSize);
+        return std::abs(effDir - effTarget);
+    case XdgIconType::Scalable: {
+        const int effMin = dir.minSize * dir.scale;
+        const int effMax = dir.maxSize * dir.scale;
+        if (effTarget < effMin)
+            return effMin - effTarget;
+        if (effTarget > effMax)
+            return effTarget - effMax;
+        return 0;
+    }
+    case XdgIconType::Threshold: {
+        const int effLo = (dir.size - dir.threshold) * dir.scale;
+        const int effHi = (dir.size + dir.threshold) * dir.scale;
+        if (effTarget < effLo)
+            return effLo - effTarget;
+        if (effTarget > effHi)
+            return effTarget - effHi;
+        return 0;
+    }
     default:
         return std::numeric_limits<int>::max();
     }

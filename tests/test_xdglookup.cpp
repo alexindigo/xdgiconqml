@@ -278,8 +278,13 @@ private slots:
 
         XdgIconDir d2;
         d2.type = XdgIconType::Scalable;
+        d2.size = 48;
+        d2.minSize = 1;
+        d2.maxSize = 512;
         d2.scale = 1;
         QCOMPARE(XdgLookup::sizeDistance(d2, 128, 1), 0);
+        QCOMPARE(XdgLookup::sizeDistance(d2, 1, 1), 0);
+        QCOMPARE(XdgLookup::sizeDistance(d2, 1024, 1), 512);
 
         XdgIconDir d3;
         d3.type = XdgIconType::Threshold;
@@ -287,7 +292,7 @@ private slots:
         d3.threshold = 2;
         d3.scale = 1;
         QCOMPARE(XdgLookup::sizeDistance(d3, 48, 1), 0);
-        QCOMPARE(XdgLookup::sizeDistance(d3, 64, 1), 16);
+        QCOMPARE(XdgLookup::sizeDistance(d3, 64, 1), 14);
     }
 
     void testXdgIconPaths() {
