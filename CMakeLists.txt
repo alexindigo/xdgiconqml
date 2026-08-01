@@ -23,6 +23,32 @@ option(WITH_DBUS_BROADCAST
     OFF
 )
 
+set(XDGICONQML_SANITIZER "none" CACHE STRING
+    "Enable a sanitizer: none | address | thread | undefined | address+undefined")
+set_property(CACHE XDGICONQML_SANITIZER PROPERTY STRINGS
+    none address thread undefined address+undefined)
+
+if(NOT XDGICONQML_SANITIZER STREQUAL "none")
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+        message(FATAL_ERROR "Sanitizers require Clang or GCC")
+    endif()
+
+    if(XDGICONQML_SANITIZER STREQUAL "address")
+        add_compile_options(-fsanitize=address -fno-omit-frame-pointer -O1 -g)
+        add_link_options(-fsanitize=address -fno-omit-frame-pointer)
+    elseif(XDGICONQML_SANITIZER STREQUAL "thread")
+        add_compile_options(-fsanitize=thread -fno-omit-frame-pointer -O1 -g)
+        add_link_options(-fsanitize=thread -fno-omit-frame-pointer)
+    elseif(XDGICONQML_SANITIZER STREQUAL "undefined")
+        add_compile_options(-fsanitize=undefined -fno-omit-frame-pointer -O1 -g)
+        add_link_options(-fsanitize=undefined -fno-omit-frame-pointer)
+    elseif(XDGICONQML_SANITIZER STREQUAL "address+undefined")
+        add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer -O1 -g)
+        add_link_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
+    endif()
+    message(STATUS "Sanitizer: ${XDGICONQML_SANITIZER}")
+endif()
+
 set(XDGICONQML_SOURCES
     xdgicon.cpp
     xdgicon.h
