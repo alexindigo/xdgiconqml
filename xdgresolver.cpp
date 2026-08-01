@@ -9,6 +9,10 @@
 
 #include "xdglookup.h"
 
+size_t qHash(const XdgLookupKey &k, size_t seed) {
+    return qHashMulti(seed, k.name, k.size, k.scale, k.themeOverride);
+}
+
 namespace {
 
 QString readGtkConfigTheme(const QString &configPath) {
@@ -192,9 +196,7 @@ XdgLookup::Result XdgResolver::lookupIcon(const QString &name, int size, int sca
         }
     }
 
-    const QString cacheKey = name + QLatin1Char('\x1f') + QString::number(size) +
-                             QLatin1Char('\x1f') + QString::number(scale) + QLatin1Char('\x1f') +
-                             themeOverride;
+    const XdgLookupKey cacheKey{name, size, scale, themeOverride};
 
     auto it = m_lookupCache.find(cacheKey);
     if (it != m_lookupCache.end())
@@ -292,11 +294,10 @@ void XdgResolver::invalidateAll() {
 
 void XdgResolver::invalidateName(const QString &name) {
     Q_ASSERT(m_ownerThread == QThread::currentThread());
-    // Remove entries matching this name from the lookup cache.
-    const QString prefix = name + QLatin1Char('\x1f');
-    QStringList toRemove;
+    // Remove entries matching this icon name from the lookup cache.
+    QList<XdgLookupKey> toRemove;
     for (auto it = m_lookupCache.begin(); it != m_lookupCache.end(); ++it) {
-        if (it.key().startsWith(prefix))
+        if (it.key().name == name)
             toRemove.append(it.key());
     }
     for (const auto &k : toRemove)

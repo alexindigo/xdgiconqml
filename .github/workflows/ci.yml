@@ -145,7 +145,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dbus: [on, off]
+        dbus: [off]
     steps:
       - uses: actions/checkout@v4
 

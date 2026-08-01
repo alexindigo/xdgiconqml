@@ -14,6 +14,20 @@
 #include "xdglookup.h"
 #include "xdgtypes.h"
 
+struct XdgLookupKey {
+    QString name;
+    int size = 0;
+    int scale = 1;
+    QString themeOverride;
+
+    bool operator==(const XdgLookupKey &o) const {
+        return name == o.name && size == o.size && scale == o.scale &&
+               themeOverride == o.themeOverride;
+    }
+};
+
+size_t qHash(const XdgLookupKey &k, size_t seed = 0);
+
 class XdgResolver {
     // Thread affinity: XdgResolver is thread-affine — all method calls
     // must occur on the same thread. This matches Qt's convention for
@@ -64,7 +78,7 @@ private:
     QString m_currentTheme;
     QStringList m_themeChain;
     mutable QHash<QString, ThemeMeta> m_themeCache;
-    mutable QHash<QString, XdgLookup::Result> m_lookupCache;
+    mutable QHash<XdgLookupKey, XdgLookup::Result> m_lookupCache;
     QHash<int, InvalidationCallback> m_listeners;
     int m_nextListenerId = 1;
     QThread *m_ownerThread = nullptr;
