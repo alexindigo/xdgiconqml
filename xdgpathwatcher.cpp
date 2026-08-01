@@ -39,6 +39,11 @@ QStringList XdgPathWatcher::watchedPaths() const {
 }
 
 void XdgPathWatcher::startMtimeTimer() {
+    // Fallback polling for filesystems where QFileSystemWatcher is
+    // unreliable (FUSE mounts, NFS/SMB remote homes, containers with
+    // inotify pressure). 5 s is a compromise between change visibility
+    // and idle CPU wakeups (~17k/day); do NOT lower without measuring.
+    // See Finding 4b in AUDIT-gemini.md.
     m_mtimeTimer.setInterval(5000);
     connect(&m_mtimeTimer, &QTimer::timeout, this, &XdgPathWatcher::checkMtimes);
     m_mtimeTimer.start();
