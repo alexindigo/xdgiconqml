@@ -169,3 +169,12 @@ jobs:
           TSAN_OPTIONS: "halt_on_error=1 second_deadlock_stack=1"
         run: ctest --test-dir build-tsan --output-on-failure
 
+  repo-lints:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install
+        run: sudo apt-get update && sudo apt-get install -y python3
+      - name: Run repo lints
+        run: scripts/run-repo-lints
+

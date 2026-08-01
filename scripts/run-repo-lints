@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+cd "$PROJECT_DIR"
+
+fail=0
+
+echo "--- Q_PROPERTY / NOTIFY signal signature check ---"
+python3 scripts/lint-property-signals.py || fail=1
+
+echo
+echo "--- Stale Expected-to-FAIL marker check ---"
+bash scripts/lint-stale-fail-markers.sh || fail=1
+
+echo
+if [ "$fail" -ne 0 ]; then
+    echo "repo lints: FAIL"
+    exit 1
+fi
+echo "repo lints: OK"
