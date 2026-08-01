@@ -96,8 +96,8 @@ void XdgIcon::resolve(bool /*force*/) {
             m_found = false;
             m_path.clear();
             m_extension.clear();
-            emit foundChanged(false);
-            emit pathChanged(QString());
+            emit foundChanged();
+            emit pathChanged();
             emit extensionChanged();
         }
         if (symbolicChanged)
@@ -120,8 +120,8 @@ void XdgIcon::resolve(bool /*force*/) {
             m_extension = fi.suffix();
         }
 
-        emit foundChanged(m_found);
-        emit pathChanged(m_path.toLocalFile());
+        emit foundChanged();
+        emit pathChanged();
         emit extensionChanged();
     }
 }
