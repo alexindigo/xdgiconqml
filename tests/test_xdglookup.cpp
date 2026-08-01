@@ -253,9 +253,6 @@ private slots:
     void testBaseWithoutIndexThemeKewCase() {
         // kew case: BASE/hicolor/512x512/apps/kew.png exists
         // but BASE/ has no index.theme — should still walk hicolor subtree.
-        //
-        // Expected to FAIL (C-3) until fallbackIconDirs is replaced with
-        // a real directory scan in plan 04-kew-fallback-scan.
         QStringList paths = {m_fixture.path()};
         auto result = XdgLookup::lookupIcon("kew", 512, 1, paths, {"basenoindex", "hicolor"});
         QVERIFY(result.found);
