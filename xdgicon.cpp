@@ -12,6 +12,7 @@ XdgIcon::~XdgIcon() {
 }
 
 void XdgIcon::componentComplete() {
+    m_completed = true;
     m_listenerId = XdgResolver::instance()->addInvalidationListener([this](const QString &name) {
         if (name.isEmpty() || name == m_name)
             QMetaObject::invokeMethod(this, [this] { resolve(); }, Qt::QueuedConnection);
@@ -28,7 +29,8 @@ void XdgIcon::setName(const QString &name) {
         return;
     m_name = name;
     emit nameChanged();
-    resolve();
+    if (m_completed)
+        resolve();
 }
 
 int XdgIcon::size() const {
@@ -40,7 +42,8 @@ void XdgIcon::setSize(int size) {
         return;
     m_size = size;
     emit sizeChanged();
-    resolve();
+    if (m_completed)
+        resolve();
 }
 
 int XdgIcon::scale() const {
@@ -52,7 +55,8 @@ void XdgIcon::setScale(int scale) {
         return;
     m_scale = scale;
     emit scaleChanged();
-    resolve();
+    if (m_completed)
+        resolve();
 }
 
 QString XdgIcon::themeOverride() const {
@@ -64,7 +68,8 @@ void XdgIcon::setThemeOverride(const QString &theme) {
         return;
     m_themeOverride = theme;
     emit themeOverrideChanged();
-    resolve();
+    if (m_completed)
+        resolve();
 }
 
 QUrl XdgIcon::path() const {

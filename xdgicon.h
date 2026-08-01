@@ -58,7 +58,7 @@ signals:
 
 protected:
     void componentComplete() override;
-    void classBegin() override {}
+    void classBegin() override { m_completed = false; }
 
 private:
     void resolve(bool force = false);
@@ -72,6 +72,7 @@ private:
     bool m_found = false;
     QString m_extension;
     bool m_isSymbolic = false;
+    bool m_completed = true;
     int m_listenerId = 0;
 };
 

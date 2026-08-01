@@ -74,10 +74,6 @@ TestCase {
     function test_no_redundant_resolves_during_construction() {
         var fx = constructionFixture.createObject(this)
         var count = fx.pathSpy.count
-        // With Finding 2a bug: count == 3
-        // (setName→resolve@48, setSize→resolve@64, setScale→resolve@64@2)
-        // Fixed: count == 1 (componentComplete does the only resolve)
-        expectFail("", "Finding 2a — setters call resolve() before componentComplete")
         compare(count, 1, "pathChanged should fire once during construction (got " + count + ")")
         fx.destroy()
     }
