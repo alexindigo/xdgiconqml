@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+SAN="${1:-address+undefined}"
+case "$SAN" in
+    address | thread | undefined | address+undefined) ;;
+    *)
+        echo "Usage: $0 [address|thread|undefined|address+undefined]" >&2
+        exit 1
+        ;;
+esac
+
+BUILD_DIR="${PROJECT_DIR}/build-san-${SAN//+/-}"
+
+cmake -S "$PROJECT_DIR" -B "$BUILD_DIR" \
+    -DCMAKE_BUILD_TYPE=Debug \
+    -DBUILD_TEST_MODE=ON \
+    -DXDGICONQML_SANITIZER="$SAN" \
+    "$@"
+
+cmake --build "$BUILD_DIR" --parallel "$(nproc)"
+
+echo
+echo "Built with sanitizer=$SAN in $BUILD_DIR"
+echo "Run tests with: (cd $BUILD_DIR && QT_QPA_PLATFORM=offscreen ctest --output-on-failure)"
