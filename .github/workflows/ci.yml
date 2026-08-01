@@ -104,6 +104,10 @@ jobs:
 
   sanitize-asan-ubsan:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dbus: [on, off]
     steps:
       - uses: actions/checkout@v4
 
@@ -119,14 +123,14 @@ jobs:
 
       - name: Configure (ASan+UBSan)
         run: |
-          cmake -S . -B build-asan \
+          cmake -S . -B build-asan-${{ matrix.dbus }} \
             -DCMAKE_BUILD_TYPE=Debug \
             -DBUILD_TEST_MODE=ON \
-            -DWITH_DBUS_BROADCAST=OFF \
+            -DWITH_DBUS_BROADCAST=${{ matrix.dbus == 'on' && 'ON' || 'OFF' }} \
             -DXDGICONQML_SANITIZER=address+undefined
 
       - name: Build
-        run: cmake --build build-asan --parallel "$(nproc)"
+        run: cmake --build build-asan-${{ matrix.dbus }} --parallel "$(nproc)"
 
       - name: Test
         env:
@@ -134,11 +138,15 @@ jobs:
           ASAN_OPTIONS: "detect_leaks=1 abort_on_error=1 halt_on_error=1"
           UBSAN_OPTIONS: "print_stacktrace=1 halt_on_error=1"
           LSAN_OPTIONS: "suppressions=${{ github.workspace }}/tests/lsan.supp"
-        run: ctest --test-dir build-asan --output-on-failure
+        run: ctest --test-dir build-asan-${{ matrix.dbus }} --output-on-failure
 
   sanitize-tsan:
     runs-on: ubuntu-latest
     continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        dbus: [on, off]
     steps:
       - uses: actions/checkout@v4
 
@@ -154,20 +162,20 @@ jobs:
 
       - name: Configure (TSan)
         run: |
-          cmake -S . -B build-tsan \
+          cmake -S . -B build-tsan-${{ matrix.dbus }} \
             -DCMAKE_BUILD_TYPE=Debug \
             -DBUILD_TEST_MODE=ON \
-            -DWITH_DBUS_BROADCAST=OFF \
+            -DWITH_DBUS_BROADCAST=${{ matrix.dbus == 'on' && 'ON' || 'OFF' }} \
             -DXDGICONQML_SANITIZER=thread
 
       - name: Build
-        run: cmake --build build-tsan --parallel "$(nproc)"
+        run: cmake --build build-tsan-${{ matrix.dbus }} --parallel "$(nproc)"
 
       - name: Test
         env:
           QT_QPA_PLATFORM: offscreen
           TSAN_OPTIONS: "halt_on_error=1 second_deadlock_stack=1"
-        run: ctest --test-dir build-tsan --output-on-failure
+        run: ctest --test-dir build-tsan-${{ matrix.dbus }} --output-on-failure
 
   repo-lints:
     runs-on: ubuntu-latest
