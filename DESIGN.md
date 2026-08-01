@@ -50,7 +50,7 @@ XdgIcon ──→ XdgResolver (cache, theme chain, invalidation listeners)
               ├── XdgLookup ──→ XdgIndexParse
               ├── XdgPathWatcher
               ├── XdgThemeWatcher
-              └── XdgBroadcast (D-Bus, optional)
+              └── XdgIconBroadcast (D-Bus, optional)
 ```
 
 ## D-Bus Integration

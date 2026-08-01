@@ -1,5 +1,5 @@
-#ifndef XDGBROADCAST_H
-#define XDGBROADCAST_H
+#ifndef XDGICONBROADCAST_H
+#define XDGICONBROADCAST_H
 
 #include <QObject>
 #include <QString>
@@ -12,11 +12,11 @@
 #include <QHash>
 #endif
 
-class XdgBroadcast : public QObject {
+class XdgIconBroadcast : public QObject {
     Q_OBJECT
 
 public:
-    explicit XdgBroadcast(QObject *parent = nullptr);
+    explicit XdgIconBroadcast(QObject *parent = nullptr);
 
     void startListening();
     void broadcastIconChanged(const QString &name);
@@ -42,4 +42,4 @@ private slots:
 #endif
 };
 
-#endif // XDGBROADCAST_H
+#endif // XDGICONBROADCAST_H

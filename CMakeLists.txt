@@ -38,8 +38,8 @@ set(XDGICONQML_SOURCES
     xdgpathwatcher.h
     xdgthemewatcher.cpp
     xdgthemewatcher.h
-    xdgbroadcast.cpp
-    xdgbroadcast.h
+    xdgiconbroadcast.cpp
+    xdgiconbroadcast.h
     xdgtypes.h
 )
 
@@ -86,7 +86,7 @@ install(FILES
     xdgresolver.h
     xdgpathwatcher.h
     xdgthemewatcher.h
-    xdgbroadcast.h
+    xdgiconbroadcast.h
     xdgtypes.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xdgiconqml
 )

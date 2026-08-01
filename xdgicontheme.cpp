@@ -1,5 +1,5 @@
 #include "xdgicontheme.h"
-#include "xdgbroadcast.h"
+#include "xdgiconbroadcast.h"
 #include "xdgresolver.h"
 #include "xdgpathwatcher.h"
 #include "xdgthemewatcher.h"
@@ -84,9 +84,9 @@ void XdgIconTheme::onWatcherFired() {
 }
 
 void XdgIconTheme::setupBroadcast() {
-    m_broadcast = new XdgBroadcast(this);
-    connect(m_broadcast, &XdgBroadcast::themeChanged, this, &XdgIconTheme::setCurrentTheme);
-    connect(m_broadcast, &XdgBroadcast::iconChanged, this,
+    m_broadcast = new XdgIconBroadcast(this);
+    connect(m_broadcast, &XdgIconBroadcast::themeChanged, this, &XdgIconTheme::setCurrentTheme);
+    connect(m_broadcast, &XdgIconBroadcast::iconChanged, this,
             [](const QString &name) { XdgResolver::instance()->invalidateName(name); });
 }
 

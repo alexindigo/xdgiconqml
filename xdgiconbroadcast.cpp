@@ -1,16 +1,16 @@
-#include "xdgbroadcast.h"
+#include "xdgiconbroadcast.h"
 #include "xdgresolver.h"
 
-XdgBroadcast::XdgBroadcast(QObject *parent) : QObject(parent) {}
+XdgIconBroadcast::XdgIconBroadcast(QObject *parent) : QObject(parent) {}
 
-void XdgBroadcast::startListening() {
+void XdgIconBroadcast::startListening() {
 #ifdef WITH_DBUS_BROADCAST
     connectPortalSettings();
     subscribePeerBroadcast();
 #endif
 }
 
-void XdgBroadcast::broadcastIconChanged(const QString &name) {
+void XdgIconBroadcast::broadcastIconChanged(const QString &name) {
 #ifdef WITH_DBUS_BROADCAST
     if (isDampened(name))
         return;
@@ -28,7 +28,7 @@ void XdgBroadcast::broadcastIconChanged(const QString &name) {
 }
 
 #ifdef WITH_DBUS_BROADCAST
-void XdgBroadcast::connectPortalSettings() {
+void XdgIconBroadcast::connectPortalSettings() {
     m_connection = QDBusConnection::sessionBus();
     if (!m_connection.isConnected())
         return;
@@ -40,23 +40,23 @@ void XdgBroadcast::connectPortalSettings() {
                                           SLOT(onSettingChanged(QString, QString, QDBusVariant)));
 
     if (!connected) {
-        qInfo("XdgBroadcast: Desktop portal Settings not available");
+        qInfo("XdgIconBroadcast: Desktop portal Settings not available");
     }
 }
 
-void XdgBroadcast::subscribePeerBroadcast() {
+void XdgIconBroadcast::subscribePeerBroadcast() {
     bool ok =
         m_connection.connect(QString(), QStringLiteral("/org/atmosphera/IconResolver"),
                              QStringLiteral("org.atmosphera.IconResolver"),
                              QStringLiteral("IconChanged"), this, SLOT(onIconChanged(QString)));
 
     if (!ok) {
-        qInfo("XdgBroadcast: Peer IconChanged subscription failed");
+        qInfo("XdgIconBroadcast: Peer IconChanged subscription failed");
     }
 }
 
-void XdgBroadcast::onSettingChanged(const QString &ns, const QString &key,
-                                    const QDBusVariant &value) {
+void XdgIconBroadcast::onSettingChanged(const QString &ns, const QString &key,
+                                        const QDBusVariant &value) {
     if (ns == QLatin1String("org.freedesktop.appearance") && key == QLatin1String("icon-theme")) {
         QString theme = value.variant().toString();
         if (!theme.isEmpty())
@@ -64,7 +64,7 @@ void XdgBroadcast::onSettingChanged(const QString &ns, const QString &key,
     }
 }
 
-void XdgBroadcast::onIconChanged(const QString &name) {
+void XdgIconBroadcast::onIconChanged(const QString &name) {
     if (name.isEmpty())
         return;
     if (isDampened(name))
@@ -74,7 +74,7 @@ void XdgBroadcast::onIconChanged(const QString &name) {
     XdgResolver::instance()->invalidateName(name);
 }
 
-bool XdgBroadcast::isDampened(const QString &name) {
+bool XdgIconBroadcast::isDampened(const QString &name) {
     auto it = m_recentBroadcasts.find(name);
     if (it == m_recentBroadcasts.end())
         return false;
@@ -83,7 +83,7 @@ bool XdgBroadcast::isDampened(const QString &name) {
     return elapsed < kDampenMs;
 }
 
-void XdgBroadcast::markBroadcasted(const QString &name) {
+void XdgIconBroadcast::markBroadcasted(const QString &name) {
     m_recentBroadcasts[name] = QDateTime::currentDateTimeUtc();
 }
 #endif

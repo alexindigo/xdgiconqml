@@ -6,7 +6,7 @@
 #include <QTimer>
 #include <QtQml/qqmlregistration.h>
 
-class XdgBroadcast;
+class XdgIconBroadcast;
 class XdgPathWatcher;
 class XdgThemeWatcher;
 
@@ -58,7 +58,7 @@ private:
 
     XdgPathWatcher *m_pathWatcher = nullptr;
     XdgThemeWatcher *m_themeWatcher = nullptr;
-    XdgBroadcast *m_broadcast = nullptr;
+    XdgIconBroadcast *m_broadcast = nullptr;
 
     static XdgIconTheme *s_instance;
 };
