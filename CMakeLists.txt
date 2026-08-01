@@ -150,6 +150,7 @@ if(BUILD_TEST_MODE)
     add_xdgiconqml_test(test_xdglookup)
     add_xdgiconqml_test(test_xdgicon)
     add_xdgiconqml_test(test_xdgicontheme)
+    add_xdgiconqml_test(test_xdgspec)
 endif()
 
 # ==================== TOOLS ====================
