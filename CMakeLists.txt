@@ -151,6 +151,9 @@ if(BUILD_TEST_MODE)
     add_xdgiconqml_test(test_xdgicon)
     add_xdgiconqml_test(test_xdgicontheme)
     add_xdgiconqml_test(test_xdgspec)
+    add_xdgiconqml_test(test_xdgiconqml)
+    target_compile_definitions(test_xdgiconqml
+            PRIVATE XDGICONQML_BUILD_DIR="${CMAKE_BINARY_DIR}")
 endif()
 
 # ==================== TOOLS ====================
