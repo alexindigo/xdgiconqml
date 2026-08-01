@@ -84,6 +84,17 @@ bool XdgIconBroadcast::isDampened(const QString &name) {
 }
 
 void XdgIconBroadcast::markBroadcasted(const QString &name) {
-    m_recentBroadcasts[name] = QDateTime::currentDateTimeUtc();
+    // Prune entries older than the dampen window. Keeps the map
+    // structurally bounded: at most N entries where N is the burst
+    // rate × kDampenMs (Finding 4a, AUDIT-gemini.md).
+    const QDateTime now = QDateTime::currentDateTimeUtc();
+    auto it = m_recentBroadcasts.begin();
+    while (it != m_recentBroadcasts.end()) {
+        if (it.value().msecsTo(now) > kDampenMs)
+            it = m_recentBroadcasts.erase(it);
+        else
+            ++it;
+    }
+    m_recentBroadcasts[name] = now;
 }
 #endif
