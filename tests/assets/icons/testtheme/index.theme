@@ -1,0 +1,17 @@
+[Icon Theme]
+Name=TestTheme
+Comment=Test fixture for xdgiconqml QML integration tests
+Directories=48x48/apps,64x64/apps,64x64@2/apps
+
+[48x48/apps]
+Size=48
+Type=Fixed
+
+[64x64/apps]
+Size=64
+Type=Fixed
+
+[64x64@2/apps]
+Size=64
+Scale=2
+Type=Fixed

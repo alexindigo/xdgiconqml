@@ -209,3 +209,40 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         run: ctest --test-dir build-bench -L benchmark -V
 
+  qml-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake g++ \
+            qt6-base-dev qt6-declarative-dev \
+            libgl1-mesa-dev libxkbcommon-dev \
+            libdbus-1-dev
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.*'
+          cache: true
+
+      - name: Configure
+        run: cmake -S . -B build-dev -DBUILD_TEST_MODE=ON
+
+      - name: Build
+        run: cmake --build build-dev --parallel "$(nproc)"
+
+      - name: Run QML tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QML_IMPORT_PATH: ${{ github.workspace }}/build-dev
+          XDG_DATA_DIRS: ${{ github.workspace }}/tests/assets
+          QS_ICON_THEME: testtheme
+        run: |
+          QMLTESTRUNNER=$(find "$QT_ROOT_DIR" -name qmltestrunner -type f | head -n1)
+          test -n "$QMLTESTRUNNER" || { echo "qmltestrunner not found"; exit 1; }
+          "$QMLTESTRUNNER" -v2 -input tests/test_xdgicon.qml
+
