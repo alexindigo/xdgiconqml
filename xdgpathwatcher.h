@@ -2,11 +2,8 @@
 #define XDGPATHWATCHER_H
 
 #include <QObject>
-#include <QDateTime>
 #include <QFileSystemWatcher>
-#include <QHash>
 #include <QStringList>
-#include <QTimer>
 
 class XdgPathWatcher : public QObject {
     Q_OBJECT
@@ -25,13 +22,8 @@ signals:
     void rescanTriggered();
 
 private:
-    void startMtimeTimer();
-    void checkMtimes();
-
     QFileSystemWatcher m_watcher;
-    QTimer m_mtimeTimer;
     QStringList m_watchedPaths;
-    QHash<QString, QDateTime> m_mtimes;
 };
 
 #endif // XDGPATHWATCHER_H

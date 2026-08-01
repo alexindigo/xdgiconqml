@@ -162,6 +162,36 @@ XdgLookup::Result XdgResolver::lookupIcon(const QString &name, int size, int sca
     if (name.isEmpty())
         return {};
 
+    // Lazy mtime check per XDG Icon Theme Spec §Implementation Notes.
+    // Stat top-level icon directories at most once per 5 s, only when
+    // an actual lookup is in progress (not on a background timer).
+    // If any directory has changed, invalidate caches and re-resolve
+    // the theme chain so subsequent lookups pick up new content.
+    {
+        const qint64 now = QDateTime::currentMSecsSinceEpoch();
+        const qint64 last = m_lastMtimeCheckMs.load(std::memory_order_relaxed);
+        if (now - last > 5000) {
+            bool changed = false;
+            for (const QString &path : m_searchPaths) {
+                QFileInfo fi(path);
+                if (fi.exists()) {
+                    static QHash<QString, QDateTime> s_mtimes;
+                    QDateTime mtime = fi.lastModified();
+                    auto it = s_mtimes.find(path);
+                    if (it == s_mtimes.end() || it.value() != mtime) {
+                        s_mtimes[path] = mtime;
+                        changed = true;
+                    }
+                }
+            }
+            if (changed) {
+                const_cast<XdgResolver *>(this)->invalidateAll();
+                const_cast<XdgResolver *>(this)->resolveThemeChain();
+            }
+            m_lastMtimeCheckMs.store(now, std::memory_order_relaxed);
+        }
+    }
+
     const QString cacheKey = name + QLatin1Char('\x1f') + QString::number(size) +
                              QLatin1Char('\x1f') + QString::number(scale) + QLatin1Char('\x1f') +
                              themeOverride;

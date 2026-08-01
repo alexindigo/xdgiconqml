@@ -7,6 +7,7 @@
 
 #include <QThread>
 
+#include <atomic>
 #include <functional>
 
 #include "xdgindexparse.h"
@@ -67,6 +68,7 @@ private:
     QHash<int, InvalidationCallback> m_listeners;
     int m_nextListenerId = 1;
     QThread *m_ownerThread = nullptr;
+    mutable std::atomic<qint64> m_lastMtimeCheckMs{0};
 };
 
 #endif // XDGRESOLVER_H
