@@ -181,6 +181,9 @@ if(BUILD_TEST_MODE)
     add_xdgiconqml_test(test_xdgiconqml)
     target_compile_definitions(test_xdgiconqml
             PRIVATE XDGICONQML_BUILD_DIR="${CMAKE_BINARY_DIR}")
+
+    add_xdgiconqml_test(bench_xdgresolver)
+    set_tests_properties(bench_xdgresolver PROPERTIES LABELS "benchmark")
 endif()
 
 # ==================== TOOLS ====================

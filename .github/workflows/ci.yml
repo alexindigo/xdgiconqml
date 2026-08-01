@@ -178,3 +178,26 @@ jobs:
       - name: Run repo lints
         run: scripts/run-repo-lints
 
+  benchmarks:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake g++ \
+            qt6-base-dev qt6-declarative-dev \
+            qt6-tools-dev qt6-tools-dev-tools \
+            libgl1-mesa-dev libxkbcommon-dev \
+            libdbus-1-dev qt6-base-dev-tools
+      - name: Configure
+        run: cmake -S . -B build-bench -DCMAKE_BUILD_TYPE=Release -DBUILD_TEST_MODE=ON
+      - name: Build
+        run: cmake --build build-bench --target bench_xdgresolver --parallel "$(nproc)"
+      - name: Run benchmarks
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: ctest --test-dir build-bench -L benchmark -V
+
