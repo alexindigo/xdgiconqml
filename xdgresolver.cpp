@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QThread>
 
 #include "xdglookup.h"
 
@@ -103,6 +104,7 @@ XdgResolver *XdgResolver::instance() {
 
 XdgResolver::XdgResolver()
     : m_searchPaths(detectSearchPaths()), m_currentTheme(detectCurrentTheme()) {
+    m_ownerThread = QThread::currentThread();
     resolveThemeChain();
 }
 
@@ -111,6 +113,7 @@ XdgResolver::~XdgResolver() = default;
 // -- configuration --
 
 void XdgResolver::setSearchPaths(const QStringList &paths) {
+    Q_ASSERT(m_ownerThread == QThread::currentThread());
     if (m_searchPaths == paths)
         return;
     m_searchPaths = paths;
@@ -119,6 +122,7 @@ void XdgResolver::setSearchPaths(const QStringList &paths) {
 }
 
 void XdgResolver::setCurrentTheme(const QString &theme) {
+    Q_ASSERT(m_ownerThread == QThread::currentThread());
     if (m_currentTheme == theme || theme.isEmpty())
         return;
     m_currentTheme = theme;
@@ -143,6 +147,7 @@ QStringList XdgResolver::availableThemes() const {
 }
 
 void XdgResolver::resolveThemeChain() {
+    Q_ASSERT(m_ownerThread == QThread::currentThread());
     m_themeChain.clear();
     if (m_currentTheme.isEmpty())
         return;
@@ -153,6 +158,7 @@ void XdgResolver::resolveThemeChain() {
 
 XdgLookup::Result XdgResolver::lookupIcon(const QString &name, int size, int scale,
                                           const QString &themeOverride) const {
+    Q_ASSERT(m_ownerThread == QThread::currentThread());
     if (name.isEmpty())
         return {};
 
@@ -242,17 +248,20 @@ QStringList XdgResolver::themeChainFor(const QString &theme, const QStringList &
 // -- cache management --
 
 void XdgResolver::ensureThemeMeta(const QString &themeRoot) const {
+    Q_ASSERT(m_ownerThread == QThread::currentThread());
     if (m_themeCache.contains(themeRoot))
         return;
     m_themeCache[themeRoot] = XdgIndexParse::parseIndexFile(themeRoot);
 }
 
 void XdgResolver::invalidateAll() {
+    Q_ASSERT(m_ownerThread == QThread::currentThread());
     m_lookupCache.clear();
     notifyListeners({});
 }
 
 void XdgResolver::invalidateName(const QString &name) {
+    Q_ASSERT(m_ownerThread == QThread::currentThread());
     // Remove entries matching this name from the lookup cache.
     const QString prefix = name + QLatin1Char('\x1f');
     QStringList toRemove;
@@ -288,6 +297,7 @@ void XdgResolver::notifyListeners(const QString &name) {
 // -- reset (test seam) --
 
 void XdgResolver::reset() {
+    Q_ASSERT(m_ownerThread == QThread::currentThread());
     m_searchPaths = detectSearchPaths();
     m_currentTheme = detectCurrentTheme();
     m_themeChain.clear();

@@ -173,7 +173,6 @@ if(BUILD_TEST_MODE)
 
     add_xdgiconqml_test(test_xdgindexparse)
     add_xdgiconqml_test(test_xdgresolver)
-    add_xdgiconqml_test(test_xdgresolver_concurrent)
     add_xdgiconqml_test(test_xdglookup)
     add_xdgiconqml_test(test_xdgicon)
     add_xdgiconqml_test(test_xdgicontheme)

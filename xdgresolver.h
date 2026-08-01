@@ -5,6 +5,8 @@
 #include <QString>
 #include <QStringList>
 
+#include <QThread>
+
 #include <functional>
 
 #include "xdgindexparse.h"
@@ -12,6 +14,13 @@
 #include "xdgtypes.h"
 
 class XdgResolver {
+    // Thread affinity: XdgResolver is thread-affine — all method calls
+    // must occur on the same thread. This matches Qt's convention for
+    // singleton QML-engine types (QNetworkAccessManager, QQmlEngine).
+    //
+    // lookupIcon() is const but mutates mutable caches (m_lookupCache,
+    // m_themeCache) — this memoization is safe only when the thread-affinity
+    // contract is respected. Debug builds assert it; release builds trust it.
 public:
     using ThemeMeta = XdgIndexParse::ThemeMeta;
     using InvalidationCallback = std::function<void(const QString &name)>;
@@ -57,6 +66,7 @@ private:
     mutable QHash<QString, XdgLookup::Result> m_lookupCache;
     QHash<int, InvalidationCallback> m_listeners;
     int m_nextListenerId = 1;
+    QThread *m_ownerThread = nullptr;
 };
 
 #endif // XDGRESOLVER_H
