@@ -83,6 +83,7 @@ private:
     int m_nextListenerId = 1;
     QThread *m_ownerThread = nullptr;
     mutable std::atomic<qint64> m_lastMtimeCheckMs{0};
+    mutable QHash<QString, QDateTime> m_pathMtimes;
 };
 
 #endif // XDGRESOLVER_H

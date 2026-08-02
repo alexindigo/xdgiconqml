@@ -121,6 +121,8 @@ void XdgResolver::setSearchPaths(const QStringList &paths) {
     if (m_searchPaths == paths)
         return;
     m_searchPaths = paths;
+    m_pathMtimes.clear();
+    m_lastMtimeCheckMs.store(0, std::memory_order_relaxed);
     invalidateAll();
     resolveThemeChain();
 }
@@ -179,11 +181,10 @@ XdgLookup::Result XdgResolver::lookupIcon(const QString &name, int size, int sca
             for (const QString &path : m_searchPaths) {
                 QFileInfo fi(path);
                 if (fi.exists()) {
-                    static QHash<QString, QDateTime> s_mtimes;
                     QDateTime mtime = fi.lastModified();
-                    auto it = s_mtimes.find(path);
-                    if (it == s_mtimes.end() || it.value() != mtime) {
-                        s_mtimes[path] = mtime;
+                    auto it = m_pathMtimes.find(path);
+                    if (it == m_pathMtimes.end() || it.value() != mtime) {
+                        m_pathMtimes[path] = mtime;
                         changed = true;
                     }
                 }
@@ -334,6 +335,8 @@ void XdgResolver::reset() {
     m_themeChain.clear();
     m_themeCache.clear();
     m_lookupCache.clear();
+    m_pathMtimes.clear();
+    m_lastMtimeCheckMs.store(0, std::memory_order_relaxed);
     resolveThemeChain();
 }
 
